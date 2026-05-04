@@ -1,4 +1,4 @@
-package cmd
+package tui
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"github.com/cicbyte/aic-cli/internal/utils"
 )
 
-func runTUI() {
+func Run() {
 	client := api.NewClient(common.AppConfigModel.AIC.BaseURL)
 	p := tea.NewProgram(initialModel(client), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
@@ -38,14 +38,8 @@ type skillItem struct {
 	skill api.Skill
 }
 
-func (i skillItem) FilterValue() string {
-	return i.skill.Name
-}
-
-func (i skillItem) Title() string {
-	return i.skill.Name
-}
-
+func (i skillItem) FilterValue() string { return i.skill.Name }
+func (i skillItem) Title() string       { return i.skill.Name }
 func (i skillItem) Description() string {
 	desc := i.skill.Description
 	if len(desc) > 50 {
@@ -188,7 +182,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							return addSkillMsg{err: err}
 						}
 
-						if err := unzip(tmpPath, skillDir); err != nil {
+						if err := utils.Unzip(tmpPath, skillDir); err != nil {
 							return addSkillMsg{err: err}
 						}
 
