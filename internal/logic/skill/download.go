@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/models"
 )
 
@@ -30,7 +29,7 @@ func NewDownloadProcessor(config *DownloadConfig, appConfig *models.AppConfig) *
 }
 
 func (p *DownloadProcessor) Execute(ctx context.Context) (*DownloadResult, error) {
-	client := api.NewClient(p.appConfig.AIC.BaseURL)
+	client := NewClient(p.appConfig)
 
 	skillID, err := ResolveSkillID(client, p.config.SkillID, p.config.SkillName)
 	if err != nil {

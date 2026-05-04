@@ -4,7 +4,12 @@ import (
 	"fmt"
 
 	"github.com/cicbyte/aic-cli/internal/api"
+	"github.com/cicbyte/aic-cli/internal/models"
 )
+
+func NewClient(appConfig *models.AppConfig) *api.Client {
+	return api.NewClient(appConfig.AIC.BaseURL, appConfig.AIC.Token)
+}
 
 func ResolveSkillID(client *api.Client, skillID int, skillName string) (int, error) {
 	if skillID != 0 {
@@ -13,7 +18,7 @@ func ResolveSkillID(client *api.Client, skillID int, skillName string) (int, err
 	if skillName == "" {
 		return 0, fmt.Errorf("必须指定 skill ID 或名称")
 	}
-	resp, err := client.ListSkills(1, 100, 0)
+	resp, err := client.ListSkills(1, 100, 0, skillName)
 	if err != nil {
 		return 0, fmt.Errorf("搜索 skill 失败: %w", err)
 	}

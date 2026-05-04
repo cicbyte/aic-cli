@@ -51,6 +51,7 @@ func init() {
 	cobra.OnInitialize(initApp)
 
 	// skill 模块（远程操作）
+	rootCmd.AddCommand(skill.GetLoginCommand())
 	rootCmd.AddCommand(skill.GetSearchCommand())
 	rootCmd.AddCommand(skill.GetAddCommand())
 	rootCmd.AddCommand(skill.GetDownloadCommand())

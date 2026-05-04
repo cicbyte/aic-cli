@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/models"
 	"github.com/cicbyte/aic-cli/internal/utils"
 )
@@ -34,7 +33,7 @@ func NewAddProcessor(config *AddConfig, appConfig *models.AppConfig) *AddProcess
 }
 
 func (p *AddProcessor) Execute(ctx context.Context) (*AddResult, error) {
-	client := api.NewClient(p.appConfig.AIC.BaseURL)
+	client := NewClient(p.appConfig)
 
 	skillID, err := ResolveSkillID(client, p.config.SkillID, p.config.SkillName)
 	if err != nil {

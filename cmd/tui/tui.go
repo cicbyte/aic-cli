@@ -16,7 +16,7 @@ import (
 )
 
 func Run() {
-	client := api.NewClient(common.AppConfigModel.AIC.BaseURL)
+	client := api.NewClient(common.AppConfigModel.AIC.BaseURL, common.AppConfigModel.AIC.Token)
 	p := tea.NewProgram(initialModel(client), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("启动失败: %v\n", err)
@@ -55,7 +55,8 @@ type model struct {
 	spinner  spinner.Model
 	skills   []api.Skill
 	selected *api.Skill
-	detail   *api.SkillDetail
+	detail   *api.Skill
+	files    []api.FileNode
 	message  string
 	err      error
 }
@@ -103,7 +104,8 @@ type loadSkillsMsg struct {
 }
 
 type loadDetailMsg struct {
-	detail *api.SkillDetail
+	detail *api.Skill
+	files  []api.FileNode
 	err    error
 }
 
@@ -116,7 +118,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		m.spinner.Tick,
 		func() tea.Msg {
-			resp, err := m.client.ListSkills(1, 100, 0)
+			resp, err := m.client.ListSkills(1, 100, 0, "")
 			if err != nil {
 				return loadSkillsMsg{err: err}
 			}
@@ -142,7 +144,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.spinner.Tick,
 						func() tea.Msg {
 							detail, err := m.client.GetSkillDetail(i.skill.ID)
-							return loadDetailMsg{detail: &detail.Data, err: err}
+							if err != nil {
+								return loadDetailMsg{err: err}
+							}
+							filesResp, err := m.client.GetSkillFiles(i.skill.ID)
+							if err != nil {
+								return loadDetailMsg{detail: &detail.Data, err: err}
+							}
+							return loadDetailMsg{detail: &detail.Data, files: filesResp.Data.Files}
 						},
 					)
 				}
@@ -193,6 +202,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = stateList
 				m.selected = nil
 				m.detail = nil
+				m.files = nil
 				return m, nil
 			}
 		}
@@ -202,6 +212,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = stateList
 				m.selected = nil
 				m.detail = nil
+				m.files = nil
 				m.message = ""
 				return m, nil
 			}
@@ -238,6 +249,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.detail = msg.detail
+		m.files = msg.files
 		m.state = stateDetail
 		return m, nil
 
@@ -265,6 +277,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func flattenFiles(nodes []api.FileNode, b *strings.Builder) {
+	for _, f := range nodes {
+		b.WriteString(fmt.Sprintf("    %s\n", f.Path))
+		if len(f.Children) > 0 {
+			flattenFiles(f.Children, b)
+		}
+	}
+}
+
 func (m model) View() string {
 	var b strings.Builder
 
@@ -283,9 +304,9 @@ func (m model) View() string {
 			b.WriteString(fmt.Sprintf("  版本: %s\n", m.detail.Version))
 			b.WriteString(fmt.Sprintf("  描述: %s\n", m.detail.Description))
 			b.WriteString(fmt.Sprintf("  下载: %d | 收藏: %d\n", m.detail.DownloadCount, m.detail.StarCount))
-			b.WriteString("\n  文件:\n")
-			for _, f := range m.detail.Files {
-				b.WriteString(fmt.Sprintf("    %s\n", f.Path))
+			if len(m.files) > 0 {
+				b.WriteString("\n  文件:\n")
+				flattenFiles(m.files, &b)
 			}
 			b.WriteString("\n" + helpStyle.Render("  a 添加到本地 | esc 返回 | q 退出"))
 		}

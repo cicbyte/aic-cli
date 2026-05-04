@@ -23,7 +23,7 @@ func NewCategoriesProcessor(config *CategoriesConfig, appConfig *models.AppConfi
 }
 
 func (p *CategoriesProcessor) Execute(ctx context.Context) (*CategoriesResult, error) {
-	client := api.NewClient(p.appConfig.AIC.BaseURL)
+	client := NewClient(p.appConfig)
 	categories, err := client.ListCategories()
 	if err != nil {
 		return nil, err

@@ -3,7 +3,6 @@ package skill
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/models"
@@ -31,9 +30,9 @@ func NewSearchProcessor(config *SearchConfig, appConfig *models.AppConfig) *Sear
 }
 
 func (p *SearchProcessor) Execute(ctx context.Context) (*SearchResult, error) {
-	client := api.NewClient(p.appConfig.AIC.BaseURL)
+	client := NewClient(p.appConfig)
 
-	resp, err := client.ListSkills(p.config.PageNum, p.config.PageSize, p.config.CategoryID)
+	resp, err := client.ListSkills(p.config.PageNum, p.config.PageSize, p.config.CategoryID, p.config.Keyword)
 	if err != nil {
 		return nil, err
 	}
@@ -42,18 +41,5 @@ func (p *SearchProcessor) Execute(ctx context.Context) (*SearchResult, error) {
 		return nil, fmt.Errorf("%s", resp.Message)
 	}
 
-	var filtered []api.Skill
-	if p.config.Keyword != "" {
-		keywordLower := strings.ToLower(p.config.Keyword)
-		for _, skill := range resp.Data.List {
-			if strings.Contains(strings.ToLower(skill.Name), keywordLower) ||
-				strings.Contains(strings.ToLower(skill.Description), keywordLower) {
-				filtered = append(filtered, skill)
-			}
-		}
-	} else {
-		filtered = resp.Data.List
-	}
-
-	return &SearchResult{Skills: filtered, Total: len(filtered)}, nil
+	return &SearchResult{Skills: resp.Data.List, Total: resp.Data.Total}, nil
 }

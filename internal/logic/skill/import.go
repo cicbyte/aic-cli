@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/models"
 )
 
@@ -30,7 +29,7 @@ func NewImportProcessor(config *ImportConfig, appConfig *models.AppConfig) *Impo
 }
 
 func (p *ImportProcessor) Execute(ctx context.Context) (*ImportResult, error) {
-	client := api.NewClient(p.appConfig.AIC.BaseURL)
+	client := NewClient(p.appConfig)
 
 	resp, err := client.ImportZip(p.config.ZipPath, p.config.Description, p.config.CategoryID, p.config.Overwrite)
 	if err != nil {

@@ -4,6 +4,7 @@ type AppConfig struct {
 	Version string `yaml:"version"` // 版本号，用于升级时判断
 	AIC struct {
 		BaseURL string `yaml:"base_url"` // AIC 服务器地址
+		Token   string `yaml:"token"`    // 认证 Token
 	} `yaml:"aic"`
 	Skills struct {
 		GlobalDir   string `yaml:"global_dir"`   // 全局skills存储目录
