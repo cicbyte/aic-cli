@@ -18,3 +18,7 @@
 .vscode/
 .claude/
 CLAUDE.md
+.reference/
+dist/
+
+__pycache__/

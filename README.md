@@ -267,16 +267,17 @@ aic-cli/
 ### 构建项目
 
 ```bash
-# 克隆仓库
-git clone https://github.com/cicbyte/aic-cli.git
-cd aic-cli
-
-# 下载依赖
-go mod download
-
-# 构建
+# 快速构建（仅 Go）
 go build -o aic-cli main.go
+
+# 完整构建（web + Go）
+python build.py
+
+# 交叉编译三平台
+python build_new.py
 ```
+
+详细的构建和发布流程请查看：[scripts/README.md](scripts/README.md)
 
 ### 运行测试
 

@@ -267,16 +267,17 @@ aic-cli/
 ### Build Project
 
 ```bash
-# Clone repository
-git clone https://github.com/cicbyte/aic-cli.git
-cd aic-cli
-
-# Download dependencies
-go mod download
-
-# Build
+# Quick build (Go only)
 go build -o aic-cli main.go
+
+# Full build (web + Go)
+python build.py
+
+# Cross-platform build
+python build_new.py
 ```
+
+For detailed build and release process, see: [scripts/README.md](scripts/README.md)
 
 ### Run Tests
 

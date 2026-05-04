@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cicbyte/aic-cli/cmd/version"
 	"github.com/cicbyte/aic-cli/internal/common"
 	"github.com/cicbyte/aic-cli/internal/log"
 	"github.com/cicbyte/aic-cli/internal/utils"
@@ -63,4 +64,6 @@ func init() {
 			os.Exit(1)
 		}
 	})
+
+	rootCmd.AddCommand(version.Cmd)
 }

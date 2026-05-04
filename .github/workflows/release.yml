@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如: 0.1.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Get Version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="v${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.ref_name }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "发布版本: $VERSION"
+
+      - name: Read VERSION File
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION 文件内容: $VERSION"
+
+      - name: Get Build Info
+        id: build_info
+        run: |
+          COMMIT=$(git rev-parse HEAD)
+          BUILDTIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "commit=$COMMIT" >> $GITHUB_OUTPUT
+          echo "buildtime=$BUILDTIME" >> $GITHUB_OUTPUT
+          echo "Commit: $COMMIT"
+          echo "Build Time: $BUILDTIME"
+
+      - name: Build Windows
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          COMMIT=${{ steps.build_info.outputs.commit }}
+          BUILDTIME=${{ steps.build_info.outputs.buildtime }}
+
+          LDFLAGS="-s -w \
+            -X github.com/cicbyte/aic-cli/cmd/version.Version=${VERSION} \
+            -X github.com/cicbyte/aic-cli/cmd/version.GitCommit=${COMMIT} \
+            -X github.com/cicbyte/aic-cli/cmd/version.BuildTime=${BUILDTIME}"
+
+          env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
+            go build -ldflags "$LDFLAGS" -o dist/aic-cli_windows_amd64.exe .
+
+      - name: Build Linux
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          COMMIT=${{ steps.build_info.outputs.commit }}
+          BUILDTIME=${{ steps.build_info.outputs.buildtime }}
+
+          LDFLAGS="-s -w \
+            -X github.com/cicbyte/aic-cli/cmd/version.Version=${VERSION} \
+            -X github.com/cicbyte/aic-cli/cmd/version.GitCommit=${COMMIT} \
+            -X github.com/cicbyte/aic-cli/cmd/version.BuildTime=${BUILDTIME}"
+
+          env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+            go build -ldflags "$LDFLAGS" -o dist/aic-cli_linux_amd64 .
+
+      - name: Build macOS
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          COMMIT=${{ steps.build_info.outputs.commit }}
+          BUILDTIME=${{ steps.build_info.outputs.buildtime }}
+
+          LDFLAGS="-s -w \
+            -X github.com/cicbyte/aic-cli/cmd/version.Version=${VERSION} \
+            -X github.com/cicbyte/aic-cli/cmd/version.GitCommit=${COMMIT} \
+            -X github.com/cicbyte/aic-cli/cmd/version.BuildTime=${BUILDTIME}"
+
+          env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
+            go build -ldflags "$LDFLAGS" -o dist/aic-cli_darwin_amd64 .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
