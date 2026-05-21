@@ -113,6 +113,10 @@ type ImportZipResponse struct {
 	} `json:"data"`
 }
 
+type HealthResponse struct {
+	Status string `json:"status"`
+}
+
 func NewClient(baseURL, token string) *Client {
 	if baseURL == "" {
 		baseURL = "http://localhost:8000"
@@ -339,6 +343,33 @@ func (c *Client) ImportZip(zipPath, description string, categoryID int, overwrit
 	var result ImportZipResponse
 	if err := c.doRequest(req, &result); err != nil {
 		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (c *Client) HealthCheck() (*HealthResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/health", c.BaseURL)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("创建请求失败: %w", err)
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("连接失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("读取响应失败: %w", err)
+	}
+
+	var result HealthResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("解析响应失败: %w", err)
 	}
 
 	return &result, nil
