@@ -189,7 +189,11 @@ func (c *Client) doRequest(req *http.Request, v interface{}) error {
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		return fmt.Errorf("认证失败: 请先使用 aic-cli login <token> 登录")
+		return fmt.Errorf("认证失败: 请先使用 aic-cli server login 登录")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("请求失败: HTTP %d, %s", resp.StatusCode, string(body))
 	}
 
 	if err := json.Unmarshal(body, v); err != nil {
@@ -315,22 +319,16 @@ func (c *Client) DownloadSkill(id int, outputPath string) (string, error) {
 }
 
 func (c *Client) ListCategories() ([]Category, error) {
-	url := fmt.Sprintf("%s/api/v1/categories?all=1", c.BaseURL)
+	url := fmt.Sprintf("%s/api/v1/categories/list", c.BaseURL)
 
-	resp, err := c.HTTPClient.Get(url)
+	req, err := c.newAuthRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("请求失败: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
+		return nil, err
 	}
 
 	var result CategoriesResponse
-	if err := json.Unmarshal(body, &result); err != nil {
-		return nil, fmt.Errorf("解析响应失败: %w", err)
+	if err := c.doRequest(req, &result); err != nil {
+		return nil, err
 	}
 
 	return result.Data.CategoriesList, nil
