@@ -6,6 +6,7 @@ import (
 
 	"github.com/cicbyte/aic-cli/cmd/config"
 	"github.com/cicbyte/aic-cli/cmd/local"
+	"github.com/cicbyte/aic-cli/cmd/server"
 	"github.com/cicbyte/aic-cli/cmd/skill"
 	"github.com/cicbyte/aic-cli/cmd/skillzip"
 	"github.com/cicbyte/aic-cli/cmd/tui"
@@ -51,8 +52,10 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initApp)
 
+	// server 模块（连接管理）
+	rootCmd.AddCommand(server.GetServerCommand())
+
 	// skill 模块（远程操作）
-	rootCmd.AddCommand(skill.GetLoginCommand())
 	rootCmd.AddCommand(skill.GetSearchCommand())
 	rootCmd.AddCommand(skill.GetAddCommand())
 	rootCmd.AddCommand(skill.GetDownloadCommand())
