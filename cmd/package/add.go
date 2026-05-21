@@ -3,11 +3,14 @@ package pkg
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/common"
 	logicskill "github.com/cicbyte/aic-cli/internal/logic/skill"
+	"github.com/cicbyte/aic-cli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +26,8 @@ func getAddCommand() *cobra.Command {
 		Long: `下载并安装指定技能包中的所有技能。
 
 支持通过 ID 或名称匹配技能包。
-名称匹配时会搜索远程技能包，找到第一个匹配项。
+名称匹配时如有多个结果，会提示选择。
+已存在的技能会自动跳过。
 
 示例:
   aic-cli package add 1
@@ -39,6 +43,7 @@ func getAddCommand() *cobra.Command {
 }
 
 func resolvePackage(client *api.Client, arg string) (*api.SkillPackage, error) {
+	// ID 直接查询
 	var id int
 	if _, err := fmt.Sscanf(arg, "%d", &id); err == nil {
 		resp, err := client.GetPackageDetail(id)
@@ -51,7 +56,8 @@ func resolvePackage(client *api.Client, arg string) (*api.SkillPackage, error) {
 		return &resp.Data, nil
 	}
 
-	resp, err := client.ListPackages(1, 10, arg)
+	// 名称搜索
+	resp, err := client.ListPackages(1, 50, arg)
 	if err != nil {
 		return nil, fmt.Errorf("搜索技能包失败: %w", err)
 	}
@@ -59,31 +65,80 @@ func resolvePackage(client *api.Client, arg string) (*api.SkillPackage, error) {
 		return nil, fmt.Errorf("%s", resp.Message)
 	}
 
+	if len(resp.Data.List) == 0 {
+		return nil, fmt.Errorf("未找到技能包: %s", arg)
+	}
+
+	// 精确匹配直接使用
 	for _, p := range resp.Data.List {
 		if p.Name == arg {
-			detail, err := client.GetPackageDetail(p.ID)
-			if err != nil {
-				return nil, err
-			}
-			if detail.Code != 0 {
-				return nil, fmt.Errorf("%s", detail.Message)
-			}
-			return &detail.Data, nil
+			return getPackageDetail(client, p.ID)
 		}
 	}
 
-	if len(resp.Data.List) > 0 {
-		detail, err := client.GetPackageDetail(resp.Data.List[0].ID)
-		if err != nil {
-			return nil, err
+	// 非精确匹配，都需要用户确认
+	selected, err := promptSelectPackage(resp.Data.List)
+	if err != nil {
+		return nil, err
+	}
+	return getPackageDetail(client, selected.ID)
+}
+
+func getPackageDetail(client *api.Client, id int) (*api.SkillPackage, error) {
+	resp, err := client.GetPackageDetail(id)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Code != 0 {
+		return nil, fmt.Errorf("%s", resp.Message)
+	}
+	return &resp.Data, nil
+}
+
+func promptSelectPackage(packages []api.SkillPackage) (*api.SkillPackage, error) {
+	options := make([]huh.Option[*api.SkillPackage], len(packages))
+	for i := range packages {
+		p := &packages[i]
+		label := fmt.Sprintf("%s (%d 个技能)", p.Name, p.SkillCount)
+		if p.Description != "" {
+			label += " - " + p.Description
 		}
-		if detail.Code != 0 {
-			return nil, fmt.Errorf("%s", detail.Message)
-		}
-		return &detail.Data, nil
+		options[i] = huh.NewOption(label, p)
 	}
 
-	return nil, fmt.Errorf("未找到技能包: %s", arg)
+	var selected *api.SkillPackage
+	err := huh.NewSelect[*api.SkillPackage]().
+		Title("找到如下匹配的技能包，请选择:").
+		Options(options...).
+		Value(&selected).
+		Run()
+	if err != nil {
+		return nil, fmt.Errorf("选择已取消")
+	}
+	return selected, nil
+}
+
+func getOutputDir() (string, error) {
+	dir, err := utils.GetSkillsOutputDir(pkgAddOutputDir)
+	if err != nil {
+		return "", err
+	}
+	if dir == "" {
+		return "", fmt.Errorf("当前目录不是 Claude Code 项目，请使用 -o 参数指定输出目录")
+	}
+	return dir, nil
+}
+
+func skillAlreadyInstalled(name, outputDir string, mode string) bool {
+	if mode == "symlink" {
+		symlinkPath := filepath.Join(outputDir, name)
+		if utils.FileExists(symlinkPath) || utils.DirExists(symlinkPath) {
+			return true
+		}
+		globalDir := utils.GetGlobalSkillsDir()
+		return utils.DirExists(filepath.Join(globalDir, name))
+	}
+	return utils.DirExists(filepath.Join(outputDir, name))
 }
 
 func runAdd(cmd *cobra.Command, args []string) {
@@ -93,6 +148,12 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 	if pkgAddMode != "copy" && pkgAddMode != "symlink" {
 		fmt.Printf("无效的安装模式: %s (支持: copy, symlink)\n", pkgAddMode)
+		os.Exit(1)
+	}
+
+	outputDir, err := getOutputDir()
+	if err != nil {
+		fmt.Printf("错误: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -112,24 +173,57 @@ func runAdd(cmd *cobra.Command, args []string) {
 	successStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
 	infoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 	errStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	skipStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 
-	fmt.Printf("%s %s（%d 个技能）\n\n", infoStyle.Render("技能包:"), pkg.Name, len(pkg.Skills))
+	// 过滤已安装的技能
+	type skillAction struct {
+		skill    api.Skill
+		installed bool
+	}
+	var actions []skillAction
+	skipped := 0
+	for _, skill := range pkg.Skills {
+		if skillAlreadyInstalled(skill.Name, outputDir, pkgAddMode) {
+			actions = append(actions, skillAction{skill, true})
+			skipped++
+		} else {
+			actions = append(actions, skillAction{skill, false})
+		}
+	}
 
+	fmt.Printf("%s %s（%d 个技能", infoStyle.Render("技能包:"), pkg.Name, len(pkg.Skills))
+	if skipped > 0 {
+		fmt.Printf("，%d 个已存在", skipped)
+	}
+	fmt.Println(")")
+	fmt.Println()
+
+	// 显示已跳过的
+	for _, a := range actions {
+		if a.installed {
+			fmt.Printf("  %s %s（已存在，跳过）\n", skipStyle.Render("-"), a.skill.Name)
+		}
+	}
+
+	// 安装未存在的
 	succeeded := 0
 	failed := 0
+	for _, a := range actions {
+		if a.installed {
+			continue
+		}
 
-	for _, skill := range pkg.Skills {
 		config := &logicskill.AddConfig{
-			SkillID:   skill.ID,
+			SkillID:   a.skill.ID,
 			OutputDir: pkgAddOutputDir,
 			Mode:      pkgAddMode,
-			Overwrite: true,
+			Overwrite: false,
 		}
 
 		processor := logicskill.NewAddProcessor(config, common.AppConfigModel)
 		result, err := processor.Execute(cmd.Context())
 		if err != nil {
-			fmt.Printf("  %s %s: %v\n", errStyle.Render("✗"), skill.Name, err)
+			fmt.Printf("  %s %s: %v\n", errStyle.Render("✗"), a.skill.Name, err)
 			failed++
 			continue
 		}
@@ -139,12 +233,9 @@ func runAdd(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println()
-	fmt.Printf("完成: %s 成功, %s 失败\n",
+	fmt.Printf("完成: %s 新增, %s 已存在, %s 失败\n",
 		successStyle.Render(fmt.Sprintf("%d", succeeded)),
+		skipStyle.Render(fmt.Sprintf("%d", skipped)),
 		errStyle.Render(fmt.Sprintf("%d", failed)),
 	)
-
-	if pkgAddMode == "symlink" {
-		fmt.Println("提示: 已通过软连接安装到全局目录")
-	}
 }
