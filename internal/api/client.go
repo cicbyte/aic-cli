@@ -117,6 +117,41 @@ type HealthResponse struct {
 	Status string `json:"status"`
 }
 
+type SkillPackage struct {
+	ID           int      `json:"id"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Color        string   `json:"color"`
+	CategoryID   int      `json:"categoryId"`
+	CategoryName string   `json:"categoryName"`
+	IsFavorite   bool     `json:"isFavorite"`
+	SkillCount   int      `json:"skillCount"`
+	Skills       []Skill  `json:"skills,omitempty"`
+	CreatedAt    string   `json:"createdAt"`
+	UpdatedAt    string   `json:"updatedAt"`
+}
+
+type PackageListResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		CurrentPage int            `json:"currentPage"`
+		Total       int            `json:"total"`
+		List        []SkillPackage `json:"packagesList"`
+	} `json:"data"`
+}
+
+type PackageDetailResponse struct {
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    SkillPackage  `json:"data"`
+}
+
+type PackageActionResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 func NewClient(baseURL, token string) *Client {
 	if baseURL == "" {
 		baseURL = "http://localhost:8000"
@@ -370,6 +405,41 @@ func (c *Client) HealthCheck() (*HealthResponse, error) {
 	var result HealthResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("解析响应失败: %w", err)
+	}
+
+	return &result, nil
+}
+
+func (c *Client) ListPackages(pageNum, pageSize int, keyword string) (*PackageListResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/packages/list?pageNum=%d&pageSize=%d", c.BaseURL, pageNum, pageSize)
+	if keyword != "" {
+		url += fmt.Sprintf("&keyword=%s", keyword)
+	}
+
+	req, err := c.newAuthRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var result PackageListResponse
+	if err := c.doRequest(req, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (c *Client) GetPackageDetail(id int) (*PackageDetailResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/packages/detail?id=%d", c.BaseURL, id)
+
+	req, err := c.newAuthRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var result PackageDetailResponse
+	if err := c.doRequest(req, &result); err != nil {
+		return nil, err
 	}
 
 	return &result, nil

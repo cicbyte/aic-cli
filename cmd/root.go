@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/cicbyte/aic-cli/cmd/config"
+	pkg "github.com/cicbyte/aic-cli/cmd/package"
 	"github.com/cicbyte/aic-cli/cmd/server"
 	"github.com/cicbyte/aic-cli/cmd/skill"
 	"github.com/cicbyte/aic-cli/cmd/tui"
@@ -55,6 +56,9 @@ func init() {
 
 	// skill 模块（技能管理）
 	rootCmd.AddCommand(skill.GetSkillCommand())
+
+	// package 模块（技能包管理）
+	rootCmd.AddCommand(pkg.GetPackageCommand())
 
 	// config 模块
 	rootCmd.AddCommand(config.GetConfigCommand())
