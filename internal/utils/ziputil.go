@@ -56,6 +56,55 @@ func Unzip(src, dest string) error {
 	return nil
 }
 
+func ZipDir(dir, outputPath string) error {
+	outFile, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("创建 ZIP 文件失败: %w", err)
+	}
+	defer outFile.Close()
+
+	zipWriter := zip.NewWriter(outFile)
+	defer zipWriter.Close()
+
+	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		name := filepath.Base(path)
+		if len(name) > 1 && name[0] == '.' {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		relPath, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			_, err = zipWriter.Create(relPath + "/")
+			return err
+		}
+
+		w, err := zipWriter.Create(relPath)
+		if err != nil {
+			return err
+		}
+
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		_, err = io.Copy(w, f)
+		return err
+	})
+}
+
 func CreateLink(oldname, newname string) error {
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("cmd", "/c", "mklink", "/J", newname, oldname)
