@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cicbyte/aic-cli/cmd/config"
 	"github.com/cicbyte/aic-cli/cmd/local"
 	"github.com/cicbyte/aic-cli/cmd/skill"
 	"github.com/cicbyte/aic-cli/cmd/skillzip"
@@ -65,6 +66,9 @@ func init() {
 
 	// zip 模块（打包）
 	rootCmd.AddCommand(skillzip.GetZipCommand())
+
+	// config 模块
+	rootCmd.AddCommand(config.GetConfigCommand())
 
 	// version 模块
 	rootCmd.AddCommand(version.Cmd)

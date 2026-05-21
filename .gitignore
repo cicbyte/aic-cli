@@ -22,3 +22,5 @@ CLAUDE.md
 dist/
 
 __pycache__/
+
+.trae/
