@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/cicbyte/aic-cli/internal/api"
@@ -50,6 +51,7 @@ func runLogin(cmd *cobra.Command, args []string) {
 			fmt.Println("已取消")
 			os.Exit(1)
 		}
+		baseURL = strings.TrimSpace(baseURL)
 		if baseURL == "" {
 			baseURL = defaultBaseURL
 		}
@@ -70,6 +72,7 @@ func runLogin(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	token = strings.TrimSpace(token)
 	if token == "" {
 		fmt.Println("错误: Token 不能为空")
 		os.Exit(1)
