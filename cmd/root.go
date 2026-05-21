@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/cicbyte/aic-cli/cmd/config"
-	"github.com/cicbyte/aic-cli/cmd/local"
 	"github.com/cicbyte/aic-cli/cmd/server"
 	"github.com/cicbyte/aic-cli/cmd/skill"
-	"github.com/cicbyte/aic-cli/cmd/skillzip"
 	"github.com/cicbyte/aic-cli/cmd/tui"
 	"github.com/cicbyte/aic-cli/cmd/version"
 	"github.com/cicbyte/aic-cli/internal/common"
@@ -55,20 +53,8 @@ func init() {
 	// server 模块（连接管理）
 	rootCmd.AddCommand(server.GetServerCommand())
 
-	// skill 模块（远程操作）
-	rootCmd.AddCommand(skill.GetSearchCommand())
-	rootCmd.AddCommand(skill.GetAddCommand())
-	rootCmd.AddCommand(skill.GetDownloadCommand())
-	rootCmd.AddCommand(skill.GetImportCommand())
-	rootCmd.AddCommand(skill.GetCategoriesCommand())
-
-	// local 模块（本地管理）
-	rootCmd.AddCommand(local.GetListCommand())
-	rootCmd.AddCommand(local.GetRemoveCommand())
-	rootCmd.AddCommand(local.GetCleanCommand())
-
-	// zip 模块（打包）
-	rootCmd.AddCommand(skillzip.GetZipCommand())
+	// skill 模块（技能管理）
+	rootCmd.AddCommand(skill.GetSkillCommand())
 
 	// config 模块
 	rootCmd.AddCommand(config.GetConfigCommand())

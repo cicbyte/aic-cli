@@ -14,6 +14,7 @@ import (
 type ZipConfig struct {
 	InputPath  string
 	OutputPath string
+	Format     string // "zip" (default) or "skill"
 }
 
 type ZipResult struct {
@@ -48,7 +49,11 @@ func (p *ZipProcessor) Execute(ctx context.Context) (*ZipResult, error) {
 
 	outputPath := p.config.OutputPath
 	if outputPath == "" {
-		outputPath = filepath.Base(inputPath) + ".zip"
+		ext := ".zip"
+		if p.config.Format == "skill" {
+			ext = ".skill"
+		}
+		outputPath = filepath.Base(inputPath) + ext
 	}
 
 	outFile, err := os.Create(outputPath)

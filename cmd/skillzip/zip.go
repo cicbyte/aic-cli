@@ -10,31 +10,42 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var zipOutput string
+var (
+	packageOutput string
+	packageFormat string
+)
 
-func GetZipCommand() *cobra.Command {
+func GetPackCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "zip [skill-folder]",
-		Short: "打包 skill 为 ZIP 文件",
-		Long: `将 skill 文件夹打包为 ZIP 文件。
+		Use:   "pack [skill-folder]",
+		Short: "打包 skill 文件夹",
+		Long: `将 skill 文件夹打包为 .zip 或 .skill 文件。
 
 文件夹中必须包含 skill.md 文件。
+默认打包为 .zip 格式，可通过 --format skill 打包为 .skill 格式。
 
 示例:
-  aic-cli zip ./my-skill
-  aic-cli zip ./my-skill -o ./output.zip`,
+  aic-cli skill pack ./my-skill
+  aic-cli skill pack ./my-skill --format skill
+  aic-cli skill pack ./my-skill -o ./output.zip`,
 		Args: cobra.MaximumNArgs(1),
-		Run:  runZip,
+		Run:  runPack,
 	}
-	cmd.Flags().StringVarP(&zipOutput, "output", "o", "", "输出 ZIP 文件路径")
+	cmd.Flags().StringVarP(&packageOutput, "output", "o", "", "输出文件路径")
+	cmd.Flags().StringVar(&packageFormat, "format", "zip", "输出格式: zip 或 skill")
 	return cmd
 }
 
-func runZip(cmd *cobra.Command, args []string) {
+func runPack(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
 		fmt.Println("请指定要打包的 skill 文件夹路径")
 		cmd.Help()
 		return
+	}
+
+	if packageFormat != "zip" && packageFormat != "skill" {
+		fmt.Printf("不支持的格式: %s（可选 zip 或 skill）\n", packageFormat)
+		os.Exit(1)
 	}
 
 	successStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
@@ -42,7 +53,8 @@ func runZip(cmd *cobra.Command, args []string) {
 
 	config := &logicskillzip.ZipConfig{
 		InputPath:  args[0],
-		OutputPath: zipOutput,
+		OutputPath: packageOutput,
+		Format:     packageFormat,
 	}
 
 	processor := logicskillzip.NewZipProcessor(config, common.AppConfigModel)
