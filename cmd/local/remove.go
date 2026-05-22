@@ -10,7 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var removeGlobal bool
+var (
+	removeGlobal    bool
+	removeAgentName string
+)
 
 func GetRemoveCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -22,6 +25,7 @@ func GetRemoveCommand() *cobra.Command {
 		Run:     runRemove,
 	}
 	cmd.Flags().BoolVarP(&removeGlobal, "global", "g", false, "同时删除全局源文件")
+	cmd.Flags().StringVar(&removeAgentName, "agent", "", "目标 Agent (claude, cursor, continue, amazonq, copilot, windsurf, cline)")
 	return cmd
 }
 
@@ -38,6 +42,7 @@ func runRemove(cmd *cobra.Command, args []string) {
 	config := &logiclocal.RemoveConfig{
 		SkillName: args[0],
 		Global:    removeGlobal,
+		AgentName: removeAgentName,
 	}
 
 	processor := logiclocal.NewRemoveProcessor(config, common.AppConfigModel)

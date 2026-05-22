@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cicbyte/aic-cli/internal/agent"
 	"github.com/cicbyte/aic-cli/internal/models"
 	"github.com/cicbyte/aic-cli/internal/utils"
 )
@@ -14,6 +15,7 @@ type RemoveConfig struct {
 	SkillName  string
 	Global     bool
 	WorkingDir string
+	AgentName  string // 目标 Agent 名称，为空时使用默认
 }
 
 type RemoveResult struct {
@@ -39,14 +41,25 @@ func (p *RemoveProcessor) Execute(ctx context.Context) (*RemoveResult, error) {
 		p.config.WorkingDir = wd
 	}
 
-	skillsDir := filepath.Join(p.config.WorkingDir, ".claude", "skills")
+	agentName := p.config.AgentName
+	if agentName == "" {
+		agentName = utils.GetDefaultAgentName()
+	}
+	var skillsDir string
+	a, err := agent.GetAgent(agentName)
+	if err != nil {
+		skillsDir = filepath.Join(p.config.WorkingDir, ".claude", "skills")
+	} else {
+		skillsDir = a.SkillsDir(p.config.WorkingDir)
+	}
+
 	skillPath := filepath.Join(skillsDir, p.config.SkillName)
 
 	if !utils.FileExists(skillPath) && !utils.DirExists(skillPath) {
 		return nil, fmt.Errorf("skill '%s' 不存在", p.config.SkillName)
 	}
 
-	if err := os.Remove(skillPath); err != nil {
+	if err := os.RemoveAll(skillPath); err != nil {
 		return nil, fmt.Errorf("删除失败: %w", err)
 	}
 

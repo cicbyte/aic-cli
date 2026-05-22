@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	addOutputDir string
-	addMode      string
+	addOutputDir  string
+	addMode       string
+	addAgentName  string
 )
 
 func GetAddCommand() *cobra.Command {
@@ -38,8 +39,9 @@ func GetAddCommand() *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		Run:  runAdd,
 	}
-	cmd.Flags().StringVarP(&addOutputDir, "outputDir", "o", "", "输出目录 (默认: .claude/skills)")
+	cmd.Flags().StringVarP(&addOutputDir, "outputDir", "o", "", "输出目录 (覆盖 Agent 默认路径)")
 	cmd.Flags().StringVarP(&addMode, "mode", "m", "copy", "安装模式: copy(复制文件) 或 symlink(全局存储+软连接)")
+	cmd.Flags().StringVar(&addAgentName, "agent", "", "目标 Agent (claude, cursor, continue, amazonq, copilot, windsurf, cline)")
 	return cmd
 }
 
@@ -134,13 +136,9 @@ func runAdd(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	outputDir, err := utils.GetSkillsOutputDir(addOutputDir)
+	outputDir, err := utils.ResolveOutputDir(addOutputDir, addAgentName)
 	if err != nil {
 		fmt.Printf("错误: %v\n", err)
-		os.Exit(1)
-	}
-	if outputDir == "" {
-		fmt.Println("当前目录不是 Claude Code 项目，请使用 -o 参数指定输出目录")
 		os.Exit(1)
 	}
 
@@ -164,7 +162,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 	config := &logicskill.AddConfig{
 		SkillID:   skill.ID,
-		OutputDir: addOutputDir,
+		OutputDir: outputDir,
 		Mode:      addMode,
 	}
 

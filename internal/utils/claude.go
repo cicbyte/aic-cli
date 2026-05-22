@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cicbyte/aic-cli/internal/agent"
 	"github.com/cicbyte/aic-cli/internal/common"
 )
 
@@ -26,6 +27,7 @@ func GetGlobalSkillsDir() string {
 	return ConfigInstance.GetGlobalSkillsDir()
 }
 
+// GetSkillsOutputDir 保持向后兼容，默认使用 Claude Code
 func GetSkillsOutputDir(outputDir string) (string, error) {
 	if outputDir != "" {
 		absPath, err := filepath.Abs(outputDir)
@@ -46,6 +48,20 @@ func GetSkillsOutputDir(outputDir string) (string, error) {
 	}
 
 	return "", nil
+}
+
+// GetSkillsDirForAgent 获取指定 Agent 的 skills 目录
+func GetSkillsDirForAgent(a agent.AgentProfile, projectDir string) (string, error) {
+	skillsDir := a.SkillsDir(projectDir)
+	return skillsDir, nil
+}
+
+// GetDefaultAgentName 从配置中获取默认 Agent 名称
+func GetDefaultAgentName() string {
+	if common.AppConfigModel != nil && common.AppConfigModel.Skills.DefaultAgent != "" {
+		return common.AppConfigModel.Skills.DefaultAgent
+	}
+	return "claude"
 }
 
 func EnsureDir(dir string) error {

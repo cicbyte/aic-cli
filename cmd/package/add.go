@@ -17,6 +17,7 @@ import (
 var (
 	pkgAddOutputDir string
 	pkgAddMode      string
+	pkgAddAgentName string
 )
 
 func getAddCommand() *cobra.Command {
@@ -37,8 +38,9 @@ func getAddCommand() *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		Run:  runAdd,
 	}
-	cmd.Flags().StringVarP(&pkgAddOutputDir, "outputDir", "o", "", "输出目录 (默认: .claude/skills)")
+	cmd.Flags().StringVarP(&pkgAddOutputDir, "outputDir", "o", "", "输出目录 (覆盖 Agent 默认路径)")
 	cmd.Flags().StringVarP(&pkgAddMode, "mode", "m", "copy", "安装模式: copy 或 symlink")
+	cmd.Flags().StringVar(&pkgAddAgentName, "agent", "", "目标 Agent (claude, cursor, continue, amazonq, copilot, windsurf, cline)")
 	return cmd
 }
 
@@ -119,14 +121,7 @@ func promptSelectPackage(packages []api.SkillPackage) (*api.SkillPackage, error)
 }
 
 func getOutputDir() (string, error) {
-	dir, err := utils.GetSkillsOutputDir(pkgAddOutputDir)
-	if err != nil {
-		return "", err
-	}
-	if dir == "" {
-		return "", fmt.Errorf("当前目录不是 Claude Code 项目，请使用 -o 参数指定输出目录")
-	}
-	return dir, nil
+	return utils.ResolveOutputDir(pkgAddOutputDir, pkgAddAgentName)
 }
 
 func skillAlreadyInstalled(name, outputDir string, mode string) bool {
@@ -215,7 +210,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 		config := &logicskill.AddConfig{
 			SkillID:   a.skill.ID,
-			OutputDir: pkgAddOutputDir,
+			OutputDir: outputDir,
 			Mode:      pkgAddMode,
 			Overwrite: false,
 		}

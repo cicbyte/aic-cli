@@ -7,8 +7,9 @@ type AppConfig struct {
 		Token   string `yaml:"token"`    // 认证 Token
 	} `yaml:"aic"`
 	Skills struct {
-		GlobalDir   string `yaml:"global_dir"`   // 全局skills存储目录
-		DefaultMode string `yaml:"default_mode"` // 默认安装模式: copy 或 symlink
+		GlobalDir    string `yaml:"global_dir"`    // 全局skills存储目录
+		DefaultMode  string `yaml:"default_mode"`  // 默认安装模式: copy 或 symlink
+		DefaultAgent string `yaml:"default_agent"` // 默认目标 Agent: claude, cursor, windsurf 等
 	} `yaml:"skills"`
 	Log struct {
 		Level      string `yaml:"level"`

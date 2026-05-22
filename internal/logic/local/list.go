@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/cicbyte/aic-cli/internal/agent"
 	"github.com/cicbyte/aic-cli/internal/models"
 	"github.com/cicbyte/aic-cli/internal/utils"
 )
@@ -19,6 +20,7 @@ type SkillEntry struct {
 type ListConfig struct {
 	Global     bool
 	WorkingDir string
+	AgentName  string // 目标 Agent 名称，为空时使用默认
 }
 
 type ListResult struct {
@@ -48,7 +50,18 @@ func (p *ListProcessor) Execute(ctx context.Context) (*ListResult, error) {
 			}
 			p.config.WorkingDir = wd
 		}
-		skillsDir = filepath.Join(p.config.WorkingDir, ".claude", "skills")
+
+		agentName := p.config.AgentName
+		if agentName == "" {
+			agentName = utils.GetDefaultAgentName()
+		}
+		a, err := agent.GetAgent(agentName)
+		if err != nil {
+			// 回退到 Claude Code
+			skillsDir = filepath.Join(p.config.WorkingDir, ".claude", "skills")
+		} else {
+			skillsDir = a.SkillsDir(p.config.WorkingDir)
+		}
 	}
 
 	if !utils.DirExists(skillsDir) {

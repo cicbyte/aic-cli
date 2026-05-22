@@ -10,7 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var listGlobal bool
+var (
+	listGlobal    bool
+	listAgentName string
+)
 
 func GetListCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -19,17 +22,19 @@ func GetListCommand() *cobra.Command {
 		Short:   "列出本地 skills",
 		Long: `列出本地已安装的 skills。
 
-默认显示当前项目 .claude/skills 目录下的 skills。
-使用 -g 参数显示全局 skills 目录下的 skills。`,
+默认显示当前项目 Agent 目录下的 skills。
+使用 -g 参数显示全局 skills 目录下的 skills。
+使用 --agent 指定目标 Agent。`,
 		Run: runList,
 	}
 	cmd.Flags().BoolVarP(&listGlobal, "global", "g", false, "显示全局 skills 目录")
+	cmd.Flags().StringVar(&listAgentName, "agent", "", "目标 Agent (claude, cursor, continue, amazonq, copilot, windsurf, cline)")
 	return cmd
 }
 
 func runList(cmd *cobra.Command, args []string) {
 	cwd, _ := os.Getwd()
-	config := &logiclocal.ListConfig{Global: listGlobal, WorkingDir: cwd}
+	config := &logiclocal.ListConfig{Global: listGlobal, WorkingDir: cwd, AgentName: listAgentName}
 
 	processor := logiclocal.NewListProcessor(config, common.AppConfigModel)
 	result, err := processor.Execute(cmd.Context())

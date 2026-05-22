@@ -1,0 +1,14 @@
+package agent
+
+// ClaudeAgent 实现 Claude Code 的 AgentProfile
+type ClaudeAgent struct{}
+
+func (a *ClaudeAgent) Name() string { return "claude" }
+
+func (a *ClaudeAgent) Detect(projectDir string) bool {
+	return detectDir(projectDir, ".claude")
+}
+
+func (a *ClaudeAgent) SkillsDir(projectDir string) string {
+	return joinPath(projectDir, ".claude", "skills")
+}

@@ -13,7 +13,7 @@ import (
 type AddConfig struct {
 	SkillID   int
 	SkillName string
-	OutputDir string
+	OutputDir string // 已解析的绝对路径（由命令层传入）
 	Mode      string
 	Overwrite bool
 }
@@ -48,12 +48,9 @@ func (p *AddProcessor) Execute(ctx context.Context) (*AddResult, error) {
 		return nil, fmt.Errorf("%s", detail.Message)
 	}
 
-	outputDir, err := utils.GetSkillsOutputDir(p.config.OutputDir)
-	if err != nil {
-		return nil, fmt.Errorf("获取输出目录失败: %w", err)
-	}
+	outputDir := p.config.OutputDir
 	if outputDir == "" {
-		return nil, fmt.Errorf("当前目录不是 Claude Code 项目，请使用 -o 参数指定输出目录")
+		return nil, fmt.Errorf("未指定输出目录")
 	}
 
 	tmpFile, err := os.CreateTemp("", "skill-*.zip")
