@@ -1,21 +1,20 @@
 package agent
 
-import (
-	"os"
-	"path/filepath"
-)
+import "path/filepath"
 
-// QoderAgent 实现 Qoder 的 AgentProfile（全局型）
-type QoderAgent struct{ globalAgent }
+// QoderAgent 实现 Qoder 的 AgentProfile（同时支持项目级和全局）
+type QoderAgent struct{ projectAgent }
 
 func (a *QoderAgent) Name() string { return "qoder" }
 
 func (a *QoderAgent) Detect(projectDir string) bool {
-	home, _ := os.UserHomeDir()
-	return detectDir(home, ".qoder")
+	return detectDir(projectDir, ".qoder")
 }
 
 func (a *QoderAgent) SkillsDir(projectDir string) string {
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".qoder", "skills")
+	return joinPath(projectDir, ".qoder", "skills")
+}
+
+func (a *QoderAgent) GlobalSkillsDir() string {
+	return filepath.Join(homeDir(), ".qoder", "skills")
 }

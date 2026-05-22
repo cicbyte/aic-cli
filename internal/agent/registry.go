@@ -33,10 +33,10 @@ func DetectAgents(projectDir string) []AgentProfile {
 	var project, global []AgentProfile
 	for _, a := range RegisteredAgents {
 		if a.Detect(projectDir) {
-			if a.IsGlobal() {
-				global = append(global, a)
-			} else {
+			if a.HasProjectSkills() {
 				project = append(project, a)
+			} else {
+				global = append(global, a)
 			}
 		}
 	}

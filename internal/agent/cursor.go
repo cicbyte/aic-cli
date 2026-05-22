@@ -1,5 +1,7 @@
 package agent
 
+import "path/filepath"
+
 // CursorAgent 实现 Cursor 的 AgentProfile
 type CursorAgent struct{ projectAgent }
 
@@ -11,4 +13,8 @@ func (a *CursorAgent) Detect(projectDir string) bool {
 
 func (a *CursorAgent) SkillsDir(projectDir string) string {
 	return joinPath(projectDir, ".cursor", "rules")
+}
+
+func (a *CursorAgent) GlobalSkillsDir() string {
+	return filepath.Join(homeDir(), ".cursor", "rules")
 }

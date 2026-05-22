@@ -63,7 +63,7 @@ func PromptSelectAgent(agents []agent.AgentProfile) (agent.AgentProfile, error) 
 	options := make([]huh.Option[agent.AgentProfile], len(agents))
 	for i, a := range agents {
 		label := a.Name()
-		if a.IsGlobal() {
+		if !a.HasProjectSkills() {
 			label += " (全局)"
 		}
 		options[i] = huh.NewOption(label, a)

@@ -1,21 +1,20 @@
 package agent
 
-import (
-	"os"
-	"path/filepath"
-)
+import "path/filepath"
 
 // CodeBuddyAgent 实现 CodeBuddy 的 AgentProfile（全局型）
-type CodeBuddyAgent struct{ globalAgent }
+type CodeBuddyAgent struct{ globalOnlyAgent }
 
 func (a *CodeBuddyAgent) Name() string { return "codebuddy" }
 
 func (a *CodeBuddyAgent) Detect(projectDir string) bool {
-	home, _ := os.UserHomeDir()
-	return detectDir(home, ".codebuddy")
+	return detectDir(homeDir(), ".codebuddy")
 }
 
 func (a *CodeBuddyAgent) SkillsDir(projectDir string) string {
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".codebuddy", "skills")
+	return filepath.Join(homeDir(), ".codebuddy", "skills")
+}
+
+func (a *CodeBuddyAgent) GlobalSkillsDir() string {
+	return filepath.Join(homeDir(), ".codebuddy", "skills")
 }

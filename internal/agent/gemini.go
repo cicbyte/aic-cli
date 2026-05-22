@@ -1,5 +1,7 @@
 package agent
 
+import "path/filepath"
+
 // GeminiAgent 实现 Gemini CLI 的 AgentProfile
 type GeminiAgent struct{ projectAgent }
 
@@ -11,4 +13,8 @@ func (a *GeminiAgent) Detect(projectDir string) bool {
 
 func (a *GeminiAgent) SkillsDir(projectDir string) string {
 	return joinPath(projectDir, ".gemini", "skills")
+}
+
+func (a *GeminiAgent) GlobalSkillsDir() string {
+	return filepath.Join(homeDir(), ".gemini", "skills")
 }

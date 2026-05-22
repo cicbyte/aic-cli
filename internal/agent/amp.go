@@ -1,5 +1,7 @@
 package agent
 
+import "path/filepath"
+
 // AmpAgent 实现 Amp 的 AgentProfile
 type AmpAgent struct{ projectAgent }
 
@@ -11,4 +13,8 @@ func (a *AmpAgent) Detect(projectDir string) bool {
 
 func (a *AmpAgent) SkillsDir(projectDir string) string {
 	return joinPath(projectDir, ".amp", "skills")
+}
+
+func (a *AmpAgent) GlobalSkillsDir() string {
+	return filepath.Join(homeDir(), ".config", "amp", "skills")
 }

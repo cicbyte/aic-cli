@@ -1,5 +1,7 @@
 package agent
 
+import "path/filepath"
+
 // CopilotAgent 实现 GitHub Copilot 的 AgentProfile
 type CopilotAgent struct{ projectAgent }
 
@@ -11,4 +13,8 @@ func (a *CopilotAgent) Detect(projectDir string) bool {
 
 func (a *CopilotAgent) SkillsDir(projectDir string) string {
 	return joinPath(projectDir, ".github", "prompts")
+}
+
+func (a *CopilotAgent) GlobalSkillsDir() string {
+	return filepath.Join(homeDir(), ".copilot", "skills")
 }
