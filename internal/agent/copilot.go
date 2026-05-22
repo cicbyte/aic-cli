@@ -1,7 +1,7 @@
 package agent
 
 // CopilotAgent 实现 GitHub Copilot 的 AgentProfile
-type CopilotAgent struct{}
+type CopilotAgent struct{ projectAgent }
 
 func (a *CopilotAgent) Name() string { return "copilot" }
 

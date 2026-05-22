@@ -1,7 +1,7 @@
 package agent
 
 // GeminiAgent 实现 Gemini CLI 的 AgentProfile
-type GeminiAgent struct{}
+type GeminiAgent struct{ projectAgent }
 
 func (a *GeminiAgent) Name() string { return "gemini" }
 

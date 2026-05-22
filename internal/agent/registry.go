@@ -21,17 +21,26 @@ var RegisteredAgents = []AgentProfile{
 	&RooAgent{},
 	&AmpAgent{},
 	&TraeAgent{},
+	&OpenClawAgent{},
+	&QClawAgent{},
+	&HermesAgent{},
+	&CodeBuddyAgent{},
+	&QoderAgent{},
 }
 
-// DetectAgents 检测当前项目中已安装的 Agent
+// DetectAgents 检测当前项目中已安装的 Agent（项目级优先，全局型在后）
 func DetectAgents(projectDir string) []AgentProfile {
-	var detected []AgentProfile
-	for _, agent := range RegisteredAgents {
-		if agent.Detect(projectDir) {
-			detected = append(detected, agent)
+	var project, global []AgentProfile
+	for _, a := range RegisteredAgents {
+		if a.Detect(projectDir) {
+			if a.IsGlobal() {
+				global = append(global, a)
+			} else {
+				project = append(project, a)
+			}
 		}
 	}
-	return detected
+	return append(project, global...)
 }
 
 // GetAgent 按名称查找 Agent

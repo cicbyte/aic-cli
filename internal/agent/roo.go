@@ -1,7 +1,7 @@
 package agent
 
 // RooAgent 实现 Roo Code 的 AgentProfile
-type RooAgent struct{}
+type RooAgent struct{ projectAgent }
 
 func (a *RooAgent) Name() string { return "roo" }
 

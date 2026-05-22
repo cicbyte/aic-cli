@@ -1,7 +1,7 @@
 package agent
 
 // AmazonQAgent 实现 Amazon Q 的 AgentProfile
-type AmazonQAgent struct{}
+type AmazonQAgent struct{ projectAgent }
 
 func (a *AmazonQAgent) Name() string { return "amazonq" }
 

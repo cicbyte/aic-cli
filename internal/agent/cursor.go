@@ -1,7 +1,7 @@
 package agent
 
 // CursorAgent 实现 Cursor 的 AgentProfile
-type CursorAgent struct{}
+type CursorAgent struct{ projectAgent }
 
 func (a *CursorAgent) Name() string { return "cursor" }
 

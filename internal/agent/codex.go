@@ -1,7 +1,7 @@
 package agent
 
 // CodexAgent 实现 Codex CLI 的 AgentProfile
-type CodexAgent struct{}
+type CodexAgent struct{ projectAgent }
 
 func (a *CodexAgent) Name() string { return "codex" }
 

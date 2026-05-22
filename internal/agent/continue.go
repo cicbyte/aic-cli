@@ -1,7 +1,7 @@
 package agent
 
 // ContinueAgent 实现 Continue 的 AgentProfile
-type ContinueAgent struct{}
+type ContinueAgent struct{ projectAgent }
 
 func (a *ContinueAgent) Name() string { return "continue" }
 

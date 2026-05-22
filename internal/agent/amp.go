@@ -1,7 +1,7 @@
 package agent
 
 // AmpAgent 实现 Amp 的 AgentProfile
-type AmpAgent struct{}
+type AmpAgent struct{ projectAgent }
 
 func (a *AmpAgent) Name() string { return "amp" }
 

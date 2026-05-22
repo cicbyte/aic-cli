@@ -33,7 +33,7 @@ func SelectAgent(projectDir string, agentName string) (agent.AgentProfile, error
 	if agentName != "" {
 		a, err := agent.GetAgent(agentName)
 		if err != nil {
-			return nil, fmt.Errorf("未知的 Agent: %s，支持: claude, cursor, continue, amazonq, copilot, windsurf, cline, opencode, codex, gemini, roo, amp, trae", agentName)
+			return nil, fmt.Errorf("未知的 Agent: %s，支持: claude, cursor, continue, amazonq, copilot, windsurf, cline, opencode, codex, gemini, roo, amp, trae, openclaw, qclaw, hermes, codebuddy, qoder", agentName)
 		}
 		return a, nil
 	}
@@ -62,7 +62,11 @@ func SelectAgent(projectDir string, agentName string) (agent.AgentProfile, error
 func PromptSelectAgent(agents []agent.AgentProfile) (agent.AgentProfile, error) {
 	options := make([]huh.Option[agent.AgentProfile], len(agents))
 	for i, a := range agents {
-		options[i] = huh.NewOption(a.Name(), a)
+		label := a.Name()
+		if a.IsGlobal() {
+			label += " (全局)"
+		}
+		options[i] = huh.NewOption(label, a)
 	}
 
 	var selected agent.AgentProfile

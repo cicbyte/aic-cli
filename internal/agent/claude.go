@@ -1,7 +1,7 @@
 package agent
 
 // ClaudeAgent 实现 Claude Code 的 AgentProfile
-type ClaudeAgent struct{}
+type ClaudeAgent struct{ projectAgent }
 
 func (a *ClaudeAgent) Name() string { return "claude" }
 

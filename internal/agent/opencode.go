@@ -1,7 +1,7 @@
 package agent
 
 // OpenCodeAgent 实现 OpenCode 的 AgentProfile
-type OpenCodeAgent struct{}
+type OpenCodeAgent struct{ projectAgent }
 
 func (a *OpenCodeAgent) Name() string { return "opencode" }
 

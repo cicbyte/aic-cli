@@ -1,7 +1,7 @@
 package agent
 
 // TraeAgent 实现 Trae 的 AgentProfile
-type TraeAgent struct{}
+type TraeAgent struct{ projectAgent }
 
 func (a *TraeAgent) Name() string { return "trae" }
 
