@@ -151,7 +151,6 @@ func runAdd(cmd *cobra.Command, args []string) {
 	}
 
 	successStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
-	warnStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 	skipStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 
 	// 检查是否已安装
@@ -179,7 +178,4 @@ func runAdd(cmd *cobra.Command, args []string) {
 	if addMode == "symlink" {
 		fmt.Printf("%s -> 全局目录\n", result.InstallPath)
 	}
-
-	fmt.Println()
-	fmt.Printf("%s: 在 Claude Code 中使用 /add-dir .claude/skills/%s 添加到上下文\n", warnStyle.Render("提示"), result.SkillName)
 }
