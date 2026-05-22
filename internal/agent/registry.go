@@ -15,6 +15,11 @@ var RegisteredAgents = []AgentProfile{
 	&CopilotAgent{},
 	&WindsurfAgent{},
 	&ClineAgent{},
+	&OpenCodeAgent{},
+	&CodexAgent{},
+	&GeminiAgent{},
+	&RooAgent{},
+	&AmpAgent{},
 }
 
 // DetectAgents 检测当前项目中已安装的 Agent
@@ -48,5 +53,11 @@ func detectDir(projectDir, relPath string) bool {
 func detectFile(projectDir, relPath string) bool {
 	info, err := os.Stat(filepath.Join(projectDir, relPath))
 	return err == nil && !info.IsDir()
+}
+
+// detectDirOrFile 检测目录或文件是否存在
+func detectDirOrFile(projectDir, relPath string) bool {
+	_, err := os.Stat(filepath.Join(projectDir, relPath))
+	return err == nil
 }
 
