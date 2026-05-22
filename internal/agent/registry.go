@@ -20,6 +20,7 @@ var RegisteredAgents = []AgentProfile{
 	&GeminiAgent{},
 	&RooAgent{},
 	&AmpAgent{},
+	&TraeAgent{},
 }
 
 // DetectAgents 检测当前项目中已安装的 Agent
