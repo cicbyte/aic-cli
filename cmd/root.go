@@ -8,7 +8,6 @@ import (
 	pkg "github.com/cicbyte/aic-cli/cmd/package"
 	"github.com/cicbyte/aic-cli/cmd/server"
 	"github.com/cicbyte/aic-cli/cmd/skill"
-	"github.com/cicbyte/aic-cli/cmd/tui"
 	"github.com/cicbyte/aic-cli/cmd/version"
 	"github.com/cicbyte/aic-cli/internal/common"
 	"github.com/cicbyte/aic-cli/internal/log"
@@ -18,31 +17,18 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "aic-cli",
-	Short: "AIC CLI - 管理 Claude Skills 的命令行工具",
-	Long: `AIC CLI 是一个用于管理 Claude Skills 的命令行工具。
+	Short: "AIC CLI - 管理 Coding Agent Skills 的命令行工具",
+	Long: `AIC CLI 是一个用于管理 Coding Agent Skills 的命令行工具。
 
 支持功能:
-  - 搜索 skills (search)
-  - 下载 skill zip 包
-  - 添加 skill 到本地目录
-  - 交互式 TUI 界面
+  - 搜索、下载、安装 skills
+  - 技能包管理
+  - 多 Agent 支持（Claude Code、Cursor、Windsurf 等）
 
-如果是 Claude Code 项目（存在 .claude 目录），
-skill 会自动保存到 .claude/skills 目录。
-
-不带任何参数运行将进入交互式 TUI 界面。`,
-	Run: func(cmd *cobra.Command, args []string) {
-		tui.Run()
-	},
+使用 aic-cli --help 查看所有命令。`,
 }
 
 func Execute() {
-	if len(os.Args) == 1 {
-		initApp()
-		tui.Run()
-		return
-	}
-
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
