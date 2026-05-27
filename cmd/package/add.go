@@ -39,7 +39,7 @@ func getAddCommand() *cobra.Command {
 		Run:  runAdd,
 	}
 	cmd.Flags().StringVarP(&pkgAddOutputDir, "outputDir", "o", "", "输出目录 (覆盖 Agent 默认路径)")
-	cmd.Flags().StringVarP(&pkgAddMode, "mode", "m", "copy", "安装模式: copy 或 symlink")
+	cmd.Flags().StringVarP(&pkgAddMode, "mode", "m", "symlink", "安装模式: symlink 或 copy")
 	cmd.Flags().StringVar(&pkgAddAgentName, "agent", "", "目标 Agent (claude, cursor, continue, amazonq, copilot, windsurf, cline)")
 	return cmd
 }
