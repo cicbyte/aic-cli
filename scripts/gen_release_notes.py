@@ -16,6 +16,7 @@ def run_git(*args):
         ["git"] + list(args),
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=False
     )
     if result.returncode != 0:
