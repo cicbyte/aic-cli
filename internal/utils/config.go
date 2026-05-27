@@ -132,7 +132,7 @@ func GetDefaultConfig() *models.AppConfig {
 	config.AIC.BaseURL = "http://localhost:8000"
 
 	config.Skills.GlobalDir = ""       // 留空表示使用默认目录 ~/.ciclebyte/aic-cli/skills
-	config.Skills.DefaultMode = "copy" // 默认安装模式: copy 或 symlink
+	config.Skills.DefaultMode = "symlink" // 默认安装模式: symlink（全局存储+链接）或 copy
 
 	config.Log.Level = "info"
 	config.Log.MaxSize = 10

@@ -127,8 +127,8 @@ aic-cli 支持将 skill 安装到不同 Coding Agent 的目录中。每个 Agent
 | trae | `.trae/skills/` | `~/.trae/skills/` |
 
 安装模式：
-- `copy`（默认）：直接复制文件到目标目录
-- `symlink`：下载到全局目录，创建软连接到目标目录
+- `symlink`（默认）：下载到全局目录，创建软连接到目标目录（Windows 使用 Junction，无需管理员权限）
+- `copy`：直接复制文件到目标目录
 
 ## 注意事项
 

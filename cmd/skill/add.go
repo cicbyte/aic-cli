@@ -31,8 +31,8 @@ func GetAddCommand() *cobra.Command {
 已存在的 skill 会自动跳过。
 
 安装模式 (--mode):
-  copy    - 直接复制文件到目标目录（默认）
-  symlink - 下载到全局目录，创建软连接到目标目录
+  symlink - 下载到全局目录，创建软连接到目标目录（默认）
+  copy    - 直接复制文件到目标目录
 
 如果是 Claude Code 项目（存在 .claude 目录），默认保存到 .claude/skills 目录。
 否则需要通过 -o 参数指定输出目录。`,
