@@ -1,6 +1,6 @@
 # AIC CLI
 
-> 🚀 Powerful Command Line Tool for Managing Claude Skills — Search, Install, Manage, All-in-One Solution
+> 🚀 Command Line Tool for Managing Coding Agent Skills — Search, Install, Manage, All-in-One
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/cicbyte/aic-cli)](https://goreportcard.com/report/github.com/cicbyte/aic-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,18 +8,15 @@
 
 **[🇨🇳 中文版](README.md)** | **[🇺🇸 English](README_EN.md)**
 
-<!-- screenshot: Add terminal screenshot or recording here -->
-
 ## ✨ Features
 
 - **🔍 Smart Search** — Quickly search skills from AIC server with keyword and category filtering
-- **📦 One-Click Install** — Download and automatically install to project or global directory, supports zip packages and URL imports
-- **🎨 Beautiful TUI** — Built-in interactive terminal interface for visual browsing and operations
-- **🗂️ Category Management** — Organize skills by category to easily find the tools you need
-- **🔗 Symbolic Links** — Support for symlink management to save storage space
-- **📊 Detailed Information** — Display version, downloads, favorites, and other detailed information
-- **🧹 Cleanup Tool** — Automatically clean unused skills to keep your environment tidy
-- **⚙️ Flexible Configuration** — Support for project-level and global skills directories with automatic `.claude` directory detection
+- **📦 One-Click Install** — Download and install to project or global directory automatically
+- **🤖 Multi-Agent Support** — Supports 18 Coding Agents (Claude Code, Cursor, Windsurf, Cline, etc.)
+- **🎨 Beautiful TUI** — Built-in interactive terminal interface for visual browsing
+- **🗂️ Skill Packages** — Install skills in bulk via packages
+- **🔗 Symlinks** — Share skills across projects with symlink management, saving disk space
+- **🧹 Cleanup** — Auto-clean broken symlinks to keep your environment tidy
 
 ## 📦 Installation
 
@@ -27,18 +24,13 @@
 
 - Go 1.23.2 or higher
 
-### Install from Source
+### From Source
 
 ```bash
-# Clone repository
 git clone https://github.com/cicbyte/aic-cli.git
 cd aic-cli
-
-# Build and install
 go build -o aic-cli main.go
-
-# Move to PATH
-sudo mv aic-cli /usr/local/bin/
+sudo mv aic-cli /usr/local/bin/  # Linux/macOS
 ```
 
 ### Using Go install
@@ -58,135 +50,114 @@ Visit the [Releases](https://github.com/cicbyte/aic-cli/releases) page to downlo
 aic-cli
 
 # Search skills
-aic-cli search claude
+aic-cli skill search "frontend"
 
 # Install a skill
-aic-cli add 123
+aic-cli skill add obsidian
+
+# Install a skill package
+aic-cli package add 1
 
 # List installed skills
-aic-cli list
+aic-cli skill list
 ```
 
 ## 📖 Usage
 
-### `aic-cli`
+### Skill Management
 
-Launch the interactive TUI interface to visually browse and manage skills.
+#### Search skills
 
 ```bash
-aic-cli
+aic-cli skill search "keyword"
+aic-cli skill search "frontend" -c 1          # Filter by category
+aic-cli skill search "react" -p 1 -n 10       # Pagination
 ```
 
-When run without any arguments, it automatically enters interactive mode with a friendly terminal user interface.
-
-### `aic-cli search [keyword]`
-
-Search for skills with keyword and category filtering.
+#### Add skills
 
 ```bash
-aic-cli search [keyword] [options]
+aic-cli skill add <skill-id>
+aic-cli skill add <skill-name>
+aic-cli skill add "obsidian" --agent cursor    # Specify target Agent
+aic-cli skill add "obsidian" -o ./custom-dir   # Custom output directory
+aic-cli skill add "obsidian" -m symlink        # Symlink mode
 ```
 
-| Option | Alias | Description | Default |
-|---|---|---|---|
-| `--category` | `-c` | Filter by category ID | `0` |
-| `--page` | `-p` | Page number | `1` |
-| `--size` | `-n` | Number per page | `20` |
+![skill-add](images/skill-add.gif)
 
-**Examples:**
+Use `--agent` to specify the target Agent — the skill will be installed into that Agent's skills directory:
+
+![skill-add-with-agent](images/skill-add-with-agent.gif)
+
+#### Download skill zip
 
 ```bash
-# Search all skills
-aic-cli search
-
-# Search by keyword
-aic-cli search claude
-
-# Filter by category
-aic-cli search --category 2
-
-# Paginate through results
-aic-cli search --page 2 --size 10
+aic-cli skill download <skill-id>
+aic-cli skill download "obsidian" -o ./downloads
 ```
 
-### `aic-cli add <id>`
-
-Download and install a skill locally.
+#### Import local skills to server
 
 ```bash
-aic-cli add <skill-id>
+aic-cli skill import ./my-skill.zip
+aic-cli skill import ./my-skill.zip -d "Skill description" -c 1
 ```
 
-**Examples:**
+#### List installed skills
 
 ```bash
-# Install a specific skill
-aic-cli add 123
-
-# Install to global directory
-aic-cli add 123 --global
+aic-cli skill list               # Current project
+aic-cli skill list -g            # Global directory
+aic-cli skill list --agent cursor # Specific Agent
 ```
 
-### `aic-cli list`
-
-List locally installed skills.
+#### Remove installed skills
 
 ```bash
-aic-cli list [options]
+aic-cli skill remove <skill-name>
+aic-cli skill remove <skill-name> -g            # Also delete global source
 ```
 
-| Option | Alias | Description | Default |
-|---|---|---|---|
-| `--global` | `-g` | Show global skills directory | `false` |
-
-**Examples:**
+#### Clean broken symlinks
 
 ```bash
-# List current project skills
-aic-cli list
-
-# List global skills
-aic-cli list -g
+aic-cli skill clean
 ```
 
-### `aic-cli remove <name>`
-
-Remove an installed skill.
+#### Package skills
 
 ```bash
-aic-cli remove <skill-name>
+aic-cli skill pack ./my-skill/                  # Default .zip
+aic-cli skill pack ./my-skill/ --format skill   # .skill format
 ```
 
-### `aic-cli categories`
-
-List all skill categories.
+#### Install mode
 
 ```bash
-aic-cli categories
+aic-cli skill mode               # Show current mode
+aic-cli skill mode symlink       # Switch to symlink mode
+aic-cli skill mode copy          # Switch to copy mode
 ```
 
-### `aic-cli download <id>`
-
-Download skill zip package to current directory.
+### Skill Packages
 
 ```bash
-aic-cli download <skill-id>
+aic-cli package list                    # List all packages
+aic-cli package list -s "frontend"      # Search packages
+aic-cli package add <package-id>        # Add by ID
+aic-cli package add "Frontend Tools"    # Add by name
+aic-cli package add 1 --agent cursor    # Specify target Agent
 ```
 
-### `aic-cli clean`
+![package-add](images/package-add.gif)
 
-Clean unused skills and cache.
-
-```bash
-aic-cli clean
-```
-
-### `aic-cli import <url>`
-
-Import a skill from URL.
+### Other Commands
 
 ```bash
-aic-cli import <url>
+aic-cli server open    # Open AIC web page in browser
+aic-cli server status  # Check server connection status
+aic-cli version        # Show version info
 ```
 
 ### All Commands
@@ -197,101 +168,109 @@ aic-cli --help
 
 | Command | Description |
 |---|---|
-| `search` | Search skills |
-| `add` | Install skill |
-| `remove` | Remove skill |
-| `list` | List installed skills |
-| `categories` | View categories |
-| `download` | Download zip package |
-| `clean` | Clean cache |
-| `import` | Import from URL |
+| `skill search` | Search remote skills |
+| `skill add` | Download and install skills |
+| `skill download` | Download skill ZIP package |
+| `skill import` | Import local skills to server |
+| `skill categories` | List all categories |
+| `skill list` | List installed skills |
+| `skill remove` | Remove installed skills |
+| `skill clean` | Clean broken symlinks |
+| `skill pack` | Package skill folder |
+| `skill mode` | View or switch install mode |
+| `package list` | List skill packages |
+| `package add` | Install all skills in a package |
+| `server open` | Open AIC web page |
+| `server status` | Check server status |
 | `tui` | Interactive interface |
+
+## 🤖 Multi-Agent Support
+
+AIC CLI can install skills into different Coding Agent directories. Use `--agent` to specify the target:
+
+```bash
+aic-cli skill add "react-helper" --agent cursor
+aic-cli skill add "react-helper" --agent windsurf
+```
+
+Supported Agents:
+
+| Agent | Project Directory | Global Directory |
+|-------|------------------|-----------------|
+| claude | `.claude/skills/` | `~/.claude/skills/` |
+| cursor | `.cursor/rules/` | `~/.cursor/rules/` |
+| windsurf | `.windsurf/skills/` | `~/.windsurf/skills/` |
+| cline | `.cline/skills/` | `~/.cline/skills/` |
+| continue | `.continue/skills/` | `~/.continue/skills/` |
+| opencode | `.opencode/skills/` | `~/.config/opencode/skills/` |
+| trae | `.trae/skills/` | `~/.trae/skills/` |
+| gemini | `.gemini/skills/` | `~/.gemini/skills/` |
+| codex | `.codex/skills/` | `~/.codex/skills/` |
+| roo | `.roo/skills/` | `~/.roo/skills/` |
+| amp | `.amp/skills/` | `~/.amp/skills/` |
+| amazonq | `.amazonq/skills/` | `~/.amazonq/skills/` |
+| copilot | `.github/prompts/` | `~/.github/prompts/` |
+| qoder | `.qoder/skills/` | `~/.qoder/skills/` |
+| openclaw | `.openclaw/skills/` | `~/.openclaw/skills/` |
+| hermes | — | `~/.hermes/skills/` |
+| codebuddy | — | `~/.codebuddy/skills/` |
+| qclaw | — | `~/.qclaw/skills/` |
+
+When `--agent` is not specified, AIC CLI auto-detects agents in the current project, prompts for selection if multiple are found, and defaults to Claude Code.
 
 ## ⚙️ Configuration
 
-### Directory Structure
+### Config File
 
-AIC CLI supports two skills directories:
-
-- **Project-level directory**: `<project>/.claude/skills/`
-  - Automatically detects `.claude` directory in current project
-  - Suitable for project-specific skills
-
-- **Global directory**: `~/.aic-cli/skills/`
-  - Cross-project shared common skills
-  - Access using `--global` or `-g` flag
-
-### Configuration File
-
-Configuration file is located at `~/.aic-cli/config.yaml`:
+Located at `~/.ciclebyte/aic-cli/config/config.yaml`:
 
 ```yaml
-# AIC Server Configuration
 aic:
-  base_url: "https://api.example.com"  # AIC server address
-  timeout: 30
+  base_url: "https://aic.cicbyte.com"
+  token: ""
 
-log:
-  level: "info"
-  path: "~/.aic-cli/logs/aic-cli.log"
+skills:
+  default_mode: "symlink"    # Install mode: symlink or copy
+  default_agent: "claude"    # Default Agent
 ```
 
-### Environment Variables
+### Install Modes
 
-| Variable | Description | Default |
-|---|---|---|
-| `AIC_CLI_BASE_URL` | AIC server API base URL | — |
-| `AIC_CLI_CONFIG` | Configuration file path | `~/.aic-cli/config.yaml` |
-| `AIC_CLI_LOG_LEVEL` | Log level | `info` |
+- **symlink** (default) — Downloads to global directory, creates a symlink in the target. Shared across projects, saves disk space. Uses Junction on Windows (no admin required).
+- **copy** — Copies files directly to the target directory. Each project has its own independent copy.
 
 ## 🏗️ Project Structure
 
 ```
 aic-cli/
-├── cmd/              # CLI command definitions
-│   ├── root.go       # Root command
-│   ├── search.go     # Search command
-│   ├── add.go        # Add command
-│   ├── list.go       # List command
-│   └── tui.go        # TUI interface
-├── internal/         # Internal packages
-│   ├── api/          # API client
-│   ├── common/       # Common definitions
-│   ├── log/          # Logging module
-│   └── utils/        # Utility functions
-└── main.go           # Program entry
+├── cmd/                  # CLI commands (Cobra)
+│   ├── skill/            # skill subcommands
+│   ├── package/          # package subcommands
+│   ├── server/           # server subcommands
+│   ├── local/            # list/remove/clean
+│   ├── skillzip/         # pack
+│   └── tui/              # Interactive interface
+├── internal/
+│   ├── agent/            # 18 Agent Profile implementations
+│   ├── api/              # AIC server API client
+│   ├── logic/            # Business logic layer
+│   ├── utils/            # Utility functions
+│   ├── models/           # Data models
+│   └── log/              # Logging module
+├── skills/               # Built-in project skills
+└── main.go
 ```
 
 ## 🛠️ Development
 
-### Build Project
-
 ```bash
-# Quick build (Go only)
+# Build
 go build -o aic-cli main.go
 
-# Full build (web + Go)
-python build.py
-
-# Cross-platform build
-python build_new.py
-```
-
-For detailed build and release process, see: [scripts/README.md](scripts/README.md)
-
-### Run Tests
-
-```bash
+# Test
+go vet ./...
 go test ./...
 ```
-
-### Contributing
-
-Issues and Pull Requests are welcome! Before submitting a PR, please ensure:
-
-1. Code passes `go test` and `go vet`
-2. Add necessary test cases
-3. Update relevant documentation
 
 ## 📄 License
 
@@ -299,8 +278,8 @@ Issues and Pull Requests are welcome! Before submitting a PR, please ensure:
 
 ## 🙏 Acknowledgments
 
-- [Cobra](https://github.com/spf13/cobra) — Powerful CLI framework
-- [Bubbletea](https://github.com/charmbracelet/bubbletea) — Beautiful TUI framework
+- [Cobra](https://github.com/spf13/cobra) — CLI framework
+- [Bubbletea](https://github.com/charmbracelet/bubbletea) — TUI framework
 - [Lipgloss](https://github.com/charmbracelet/lipgloss) — Terminal styling library
 
 ---

@@ -1,6 +1,6 @@
 # AIC CLI
 
-> 🚀 管理 Claude Skills 的强大命令行工具 — 搜索、安装、管理，一站式解决方案
+> 🚀 管理 Coding Agent Skills 的命令行工具 — 搜索、安装、管理，一站式解决方案
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/cicbyte/aic-cli)](https://goreportcard.com/report/github.com/cicbyte/aic-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,18 +8,15 @@
 
 **[🇨🇳 中文版](README.md)** | **[🇺🇸 English](README_EN.md)**
 
-<!-- screenshot: 在此处添加终端录屏或截图 -->
-
 ## ✨ 功能特性
 
 - **🔍 智能搜索** — 从 AIC 服务器快速搜索 skills，支持关键词和分类筛选
-- **📦 一键安装** — 下载并自动安装到项目或全局目录，支持 zip 包和链接导入
+- **📦 一键安装** — 下载并自动安装到项目或全局目录
+- **🤖 多 Agent 支持** — 支持 18 种 Coding Agent（Claude Code、Cursor、Windsurf、Cline 等）
 - **🎨 精美 TUI** — 内置交互式终端界面，可视化浏览和操作
-- **🗂️ 分类管理** — 按 category 组织 skills，轻松找到所需工具
-- **🔗 符号链接** — 支持软链接管理，节省存储空间
-- **📊 详细信息** — 显示版本、下载量、收藏数等详细信息
-- **🧹 清理工具** — 自动清理未使用的 skills，保持环境整洁
-- **⚙️ 灵活配置** — 支持项目级和全局 skills 目录，自动检测 `.claude` 目录
+- **🗂️ 技能包** — 按技能包批量安装，一键配齐开发环境
+- **🔗 符号链接** — 支持软链接管理，多项目共享同一份 skill，节省存储空间
+- **🧹 清理工具** — 自动清理失效的软链接，保持环境整洁
 
 ## 📦 安装
 
@@ -30,15 +27,10 @@
 ### 从源码安装
 
 ```bash
-# 克隆仓库
 git clone https://github.com/cicbyte/aic-cli.git
 cd aic-cli
-
-# 编译安装
 go build -o aic-cli main.go
-
-# 移动到 PATH
-sudo mv aic-cli /usr/local/bin/
+sudo mv aic-cli /usr/local/bin/  # Linux/macOS
 ```
 
 ### 使用 Go install
@@ -58,135 +50,114 @@ go install github.com/cicbyte/aic-cli@latest
 aic-cli
 
 # 搜索 skills
-aic-cli search claude
+aic-cli skill search "前端"
 
 # 安装 skill
-aic-cli add 123
+aic-cli skill add obsidian
+
+# 安装技能包
+aic-cli package add 1
 
 # 列出已安装的 skills
-aic-cli list
+aic-cli skill list
 ```
 
 ## 📖 使用方法
 
-### `aic-cli`
+### Skill 管理
 
-启动交互式 TUI 界面，可视化浏览和管理 skills。
+#### 搜索 skill
 
 ```bash
-aic-cli
+aic-cli skill search "关键词"
+aic-cli skill search "前端" -c 1          # 按分类筛选
+aic-cli skill search "react" -p 1 -n 10   # 分页
 ```
 
-不带任何参数运行时，自动进入交互模式，提供友好的终端用户界面。
-
-### `aic-cli search [keyword]`
-
-搜索 skills，支持关键词和分类筛选。
+#### 添加 skill
 
 ```bash
-aic-cli search [关键词] [选项]
+aic-cli skill add <skill-id>
+aic-cli skill add <skill-name>
+aic-cli skill add "obsidian" --agent cursor    # 指定目标 Agent
+aic-cli skill add "obsidian" -o ./custom-dir   # 指定输出目录
+aic-cli skill add "obsidian" -m symlink        # symlink 模式
 ```
 
-| 选项 | 别名 | 说明 | 默认值 |
-|---|---|---|---|
-| `--category` | `-c` | 按分类 ID 筛选 | `0` |
-| `--page` | `-p` | 页码 | `1` |
-| `--size` | `-n` | 每页数量 | `20` |
+![skill-add](images/skill-add.gif)
 
-**示例：**
+使用 `--agent` 指定目标 Agent 时，skill 会安装到对应 Agent 的 skills 目录：
+
+![skill-add-with-agent](images/skill-add-with-agent.gif)
+
+#### 下载 skill zip 包
 
 ```bash
-# 搜索所有 skills
-aic-cli search
-
-# 按关键词搜索
-aic-cli search claude
-
-# 按分类筛选
-aic-cli search --category 2
-
-# 分页浏览
-aic-cli search --page 2 --size 10
+aic-cli skill download <skill-id>
+aic-cli skill download "obsidian" -o ./downloads
 ```
 
-### `aic-cli add <id>`
-
-下载并安装 skill 到本地。
+#### 导入本地技能到服务器
 
 ```bash
-aic-cli add <skill-id>
+aic-cli skill import ./my-skill.zip
+aic-cli skill import ./my-skill.zip -d "技能描述" -c 1
 ```
 
-**示例：**
+#### 列出已安装的 skill
 
 ```bash
-# 安装指定 skill
-aic-cli add 123
-
-# 安装到全局目录
-aic-cli add 123 --global
+aic-cli skill list               # 当前项目
+aic-cli skill list -g            # 全局目录
+aic-cli skill list --agent cursor # 指定 Agent
 ```
 
-### `aic-cli list`
-
-列出本地已安装的 skills。
+#### 移除已安装的 skill
 
 ```bash
-aic-cli list [选项]
+aic-cli skill remove <skill-name>
+aic-cli skill remove <skill-name> -g            # 同时删除全局源文件
 ```
 
-| 选项 | 别名 | 说明 | 默认值 |
-|---|---|---|---|
-| `--global` | `-g` | 显示全局 skills 目录 | `false` |
-
-**示例：**
+#### 清理失效软链接
 
 ```bash
-# 列出当前项目 skills
-aic-cli list
-
-# 列出全局 skills
-aic-cli list -g
+aic-cli skill clean
 ```
 
-### `aic-cli remove <name>`
-
-删除已安装的 skill。
+#### 打包 skill
 
 ```bash
-aic-cli remove <skill-name>
+aic-cli skill pack ./my-skill/                  # 默认 .zip
+aic-cli skill pack ./my-skill/ --format skill   # .skill 格式
 ```
 
-### `aic-cli categories`
-
-列出所有 skill 分类。
+#### 安装模式
 
 ```bash
-aic-cli categories
+aic-cli skill mode               # 查看当前模式
+aic-cli skill mode symlink       # 切换到 symlink 模式
+aic-cli skill mode copy          # 切换到 copy 模式
 ```
 
-### `aic-cli download <id>`
-
-下载 skill zip 包到当前目录。
+### 技能包管理
 
 ```bash
-aic-cli download <skill-id>
+aic-cli package list                    # 列出所有技能包
+aic-cli package list -s "前端"          # 搜索技能包
+aic-cli package add <package-id>        # 按 ID 添加
+aic-cli package add "前端工具"           # 按名称添加
+aic-cli package add 1 --agent cursor    # 指定目标 Agent
 ```
 
-### `aic-cli clean`
+![package-add](images/package-add.gif)
 
-清理未使用的 skills 和缓存。
-
-```bash
-aic-cli clean
-```
-
-### `aic-cli import <url>`
-
-从 URL 导入 skill。
+### 其他命令
 
 ```bash
-aic-cli import <url>
+aic-cli server open    # 在浏览器中打开 AIC 服务页面
+aic-cli server status  # 查看服务器连接状态
+aic-cli version        # 显示版本信息
 ```
 
 ### 全部命令
@@ -197,101 +168,109 @@ aic-cli --help
 
 | 命令 | 说明 |
 |---|---|
-| `search` | 搜索 skills |
-| `add` | 安装 skill |
-| `remove` | 删除 skill |
-| `list` | 列出已安装的 skills |
-| `categories` | 查看分类 |
-| `download` | 下载 zip 包 |
-| `clean` | 清理缓存 |
-| `import` | 从 URL 导入 |
+| `skill search` | 搜索远程技能 |
+| `skill add` | 下载并安装技能 |
+| `skill download` | 下载技能 ZIP 包 |
+| `skill import` | 导入本地技能到服务器 |
+| `skill categories` | 列出所有分类 |
+| `skill list` | 列出已安装的技能 |
+| `skill remove` | 移除已安装的技能 |
+| `skill clean` | 清理失效的软链接 |
+| `skill pack` | 打包技能文件夹 |
+| `skill mode` | 查看或切换安装模式 |
+| `package list` | 列出技能包 |
+| `package add` | 安装技能包中的所有技能 |
+| `server open` | 打开 AIC 服务页面 |
+| `server status` | 查看服务器状态 |
 | `tui` | 交互式界面 |
+
+## 🤖 多 Agent 支持
+
+AIC CLI 支持将 skill 安装到不同 Coding Agent 的目录中。使用 `--agent` 参数指定目标 Agent：
+
+```bash
+aic-cli skill add "react-helper" --agent cursor
+aic-cli skill add "react-helper" --agent windsurf
+```
+
+支持的 Agent：
+
+| Agent | 项目级目录 | 全局目录 |
+|-------|-----------|---------|
+| claude | `.claude/skills/` | `~/.claude/skills/` |
+| cursor | `.cursor/rules/` | `~/.cursor/rules/` |
+| windsurf | `.windsurf/skills/` | `~/.windsurf/skills/` |
+| cline | `.cline/skills/` | `~/.cline/skills/` |
+| continue | `.continue/skills/` | `~/.continue/skills/` |
+| opencode | `.opencode/skills/` | `~/.config/opencode/skills/` |
+| trae | `.trae/skills/` | `~/.trae/skills/` |
+| gemini | `.gemini/skills/` | `~/.gemini/skills/` |
+| codex | `.codex/skills/` | `~/.codex/skills/` |
+| roo | `.roo/skills/` | `~/.roo/skills/` |
+| amp | `.amp/skills/` | `~/.amp/skills/` |
+| amazonq | `.amazonq/skills/` | `~/.amazonq/skills/` |
+| copilot | `.github/prompts/` | `~/.github/prompts/` |
+| qoder | `.qoder/skills/` | `~/.qoder/skills/` |
+| openclaw | `.openclaw/skills/` | `~/.openclaw/skills/` |
+| hermes | — | `~/.hermes/skills/` |
+| codebuddy | — | `~/.codebuddy/skills/` |
+| qclaw | — | `~/.qclaw/skills/` |
+
+不指定 `--agent` 时，自动检测当前项目的 Agent，多个时交互选择，默认使用 Claude Code。
 
 ## ⚙️ 配置
 
-### 目录结构
-
-AIC CLI 支持两种 skills 目录：
-
-- **项目级目录**：`<project>/.claude/skills/`
-  - 自动检测当前项目中的 `.claude` 目录
-  - 适合项目特定的 skills
-
-- **全局目录**：`~/.aic-cli/skills/`
-  - 跨项目共享的通用 skills
-  - 使用 `--global` 或 `-g` 参数访问
-
 ### 配置文件
 
-配置文件位于 `~/.aic-cli/config.yaml`：
+配置文件位于 `~/.ciclebyte/aic-cli/config/config.yaml`：
 
 ```yaml
-# AIC 服务器配置
 aic:
-  base_url: "https://api.example.com"  # AIC 服务器地址
-  timeout: 30
+  base_url: "https://aic.cicbyte.com"
+  token: ""
 
-log:
-  level: "info"
-  path: "~/.aic-cli/logs/aic-cli.log"
+skills:
+  default_mode: "symlink"    # 安装模式: symlink 或 copy
+  default_agent: "claude"    # 默认 Agent
 ```
 
-### 环境变量
+### 安装模式
 
-| 变量 | 说明 | 默认值 |
-|---|---|---|
-| `AIC_CLI_BASE_URL` | AIC 服务器 API 基础 URL | — |
-| `AIC_CLI_CONFIG` | 配置文件路径 | `~/.aic-cli/config.yaml` |
-| `AIC_CLI_LOG_LEVEL` | 日志级别 | `info` |
+- **symlink**（默认）— 下载到全局目录，创建软连接到目标目录。多项目共享，节省磁盘空间。Windows 使用 Junction，无需管理员权限。
+- **copy** — 直接复制文件到目标目录。各项目独立，互不影响。
 
 ## 🏗️ 项目结构
 
 ```
 aic-cli/
-├── cmd/              # CLI 命令定义
-│   ├── root.go       # 根命令
-│   ├── search.go     # 搜索命令
-│   ├── add.go        # 添加命令
-│   ├── list.go       # 列表命令
-│   └── tui.go        # TUI 界面
-├── internal/         # 内部包
-│   ├── api/          # API 客户端
-│   ├── common/       # 公共定义
-│   ├── log/          # 日志模块
-│   └── utils/        # 工具函数
-└── main.go           # 程序入口
+├── cmd/                  # CLI 命令定义（Cobra）
+│   ├── skill/            # skill 子命令
+│   ├── package/          # package 子命令
+│   ├── server/           # server 子命令
+│   ├── local/            # list/remove/clean
+│   ├── skillzip/         # pack
+│   └── tui/              # 交互式界面
+├── internal/
+│   ├── agent/            # 18 个 Agent Profile 实现
+│   ├── api/              # AIC 服务器 API 客户端
+│   ├── logic/            # 业务逻辑层
+│   ├── utils/            # 工具函数
+│   ├── models/           # 数据模型
+│   └── log/              # 日志模块
+├── skills/               # 项目内置 skills
+└── main.go
 ```
 
 ## 🛠️ 开发
 
-### 构建项目
-
 ```bash
-# 快速构建（仅 Go）
+# 构建
 go build -o aic-cli main.go
 
-# 完整构建（web + Go）
-python build.py
-
-# 交叉编译三平台
-python build_new.py
-```
-
-详细的构建和发布流程请查看：[scripts/README.md](scripts/README.md)
-
-### 运行测试
-
-```bash
+# 测试
+go vet ./...
 go test ./...
 ```
-
-### 贡献指南
-
-欢迎提交 Issue 和 Pull Request！在提交 PR 前，请确保：
-
-1. 代码通过 `go test` 和 `go vet`
-2. 添加必要的测试用例
-3. 更新相关文档
 
 ## 📄 开源许可证
 
@@ -299,8 +278,8 @@ go test ./...
 
 ## 🙏 致谢
 
-- [Cobra](https://github.com/spf13/cobra) — 强大的 CLI 框架
-- [Bubbletea](https://github.com/charmbracelet/bubbletea) — 精美的 TUI 框架
+- [Cobra](https://github.com/spf13/cobra) — CLI 框架
+- [Bubbletea](https://github.com/charmbracelet/bubbletea) — TUI 框架
 - [Lipgloss](https://github.com/charmbracelet/lipgloss) — 终端样式库
 
 ---
