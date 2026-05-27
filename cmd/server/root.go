@@ -16,6 +16,6 @@ func GetServerCommand() *cobra.Command {
   aic-cli server logout
   aic-cli server status`,
 	}
-	cmd.AddCommand(loginCmd, logoutCmd, statusCmd)
+	cmd.AddCommand(loginCmd, logoutCmd, statusCmd, openCmd)
 	return cmd
 }
