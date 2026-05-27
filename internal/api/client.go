@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -156,6 +157,7 @@ func NewClient(baseURL, token string) *Client {
 	if baseURL == "" {
 		baseURL = "http://localhost:8000"
 	}
+	baseURL = strings.TrimRight(baseURL, "/")
 	return &Client{
 		BaseURL: baseURL,
 		Token:   token,
