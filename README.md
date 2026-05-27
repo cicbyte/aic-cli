@@ -8,6 +8,8 @@
 
 **[🇨🇳 中文版](README.md)** | **[🇺🇸 English](README_EN.md)**
 
+> AIC CLI 是 [AIC](https://github.com/cicbyte/aic) 的配套命令行工具。AIC 是 Coding Agent Skills 的开放平台，AIC CLI 负责在终端中搜索、安装和管理这些 skills。
+
 ## ✨ 功能特性
 
 - **🔍 智能搜索** — 从 AIC 服务器快速搜索 skills，支持关键词和分类筛选

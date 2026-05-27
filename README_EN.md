@@ -8,6 +8,8 @@
 
 **[🇨🇳 中文版](README.md)** | **[🇺🇸 English](README_EN.md)**
 
+> AIC CLI is the companion CLI for [AIC](https://github.com/cicbyte/aic) — an open platform for Coding Agent Skills. AIC CLI handles searching, installing, and managing skills from the terminal.
+
 ## ✨ Features
 
 - **🔍 Smart Search** — Quickly search skills from AIC server with keyword and category filtering

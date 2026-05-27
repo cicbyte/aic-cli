@@ -26,3 +26,4 @@ __pycache__/
 .trae/
 rewrite.json
 docs/
+msg.txt
