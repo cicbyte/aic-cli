@@ -98,6 +98,14 @@ aic-cli skill pack ./my-skill/ --format skill   # .skill 格式
 aic-cli skill pack ./my-skill/ -o output.zip    # 指定输出文件名
 ```
 
+### 安装模式管理
+
+```bash
+aic-cli skill mode               # 查看当前模式及说明
+aic-cli skill mode symlink       # 切换到 symlink 模式
+aic-cli skill mode copy          # 切换到 copy 模式
+```
+
 ## 技能包管理
 
 ```bash

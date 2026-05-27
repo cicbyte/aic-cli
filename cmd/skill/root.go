@@ -43,5 +43,8 @@ func GetSkillCommand() *cobra.Command {
 	// 打包
 	cmd.AddCommand(skillzip.GetPackCommand())
 
+	// 模式管理
+	cmd.AddCommand(modeCmd)
+
 	return cmd
 }
