@@ -375,15 +375,15 @@ class TestPatchEdgeCases:
 
     def test_patch_no_path(self):
         """缺少 path 参数"""
-        result = self.cli.run("skill", "patch", str(self.skill_id), "--old", "test", "--new", "new")
+        result = self.cli.run("skill", "remote", "patch", str(self.skill_id), "--old", "test", "--new", "new")
         assert_error_output(result)
 
     def test_patch_no_old_or_line(self):
         """缺少 old 和 line 参数"""
-        result = self.cli.run("skill", "patch", str(self.skill_id), "--path", "SKILL.md", "--new", "new")
+        result = self.cli.run("skill", "remote", "patch", str(self.skill_id), "--path", "SKILL.md", "--new", "new")
         assert_error_output(result)
 
     def test_patch_no_new(self):
         """缺少 new 参数"""
-        result = self.cli.run("skill", "patch", str(self.skill_id), "--path", "SKILL.md", "--old", "test")
+        result = self.cli.run("skill", "remote", "patch", str(self.skill_id), "--path", "SKILL.md", "--old", "test")
         assert_error_output(result)

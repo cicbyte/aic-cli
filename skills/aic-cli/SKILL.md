@@ -13,13 +13,14 @@ AIC CLI 是用于管理 Coding Agent skills 的命令行工具，支持从 AIC �
 ## 命令总览
 
 ```
-aic-cli skill       # skills 管理（搜索、下载、安装、导入、打包）
-aic-cli package     # 技能包管理（列表、添加）
-aic-cli server      # 服务器操作（打开页面、查看状态）
-aic-cli version     # 显示版本信息
+aic-cli skill           # skills 管理（搜索、下载、安装、导入、打包）
+aic-cli skill remote    # 远程技能管理（AI Agent 专用：cat/tree/patch/validate/publish）
+aic-cli package         # 技能包管理（列表、添加）
+aic-cli server          # 服务器操作（打开页面、查看状态）
+aic-cli version         # 显示版本信息
 ```
 
-## Skills 管理
+## Skills 管理（常用命令）
 
 ### 搜索 skill
 
@@ -27,94 +28,6 @@ aic-cli version     # 显示版本信息
 aic-cli skill search "关键词"
 aic-cli skill search "前端" -c 1        # 按分类筛选
 aic-cli skill search "react" -p 1 -n 10 # 分页
-```
-
-### 查看远程文件内容
-
-```bash
-aic-cli skill cat 42 SKILL.md               # 输出到 stdout
-aic-cli skill cat 42 SKILL.md -o local.md   # 保存到本地文件
-```
-
-### 显示远程文件树
-
-```bash
-aic-cli skill tree 42
-```
-
-输出示例：
-```
-my-skill (ID: 42)
-├── SKILL.md (1.2KB)
-├── prompts/
-│   ├── review.md (512B)
-│   └── refactor.md (384B)
-└── references/
-    └── api.md (2.1KB)
-```
-
-### 增量编辑技能文件
-
-```bash
-# 纯内容匹配
-aic-cli skill patch 42 --path SKILL.md \
-  --old "description: 旧描述" \
-  --new "description: 新描述"
-
-# 行号 + 内容校验（推荐）
-aic-cli skill patch 42 --path SKILL.md \
-  --line 5 \
-  --old "description: 旧描述" \
-  --new "description: 新描述"
-
-# 纯行号替换
-aic-cli skill patch 42 --path SKILL.md \
-  --line 20-25 \
-  --new "## 新增章节\n\n替换全部内容"
-
-# 通过 stdin 传入 JSON
-echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill patch 42 --stdin
-
-# 批量 patch 多个文件
-aic-cli skill patch 42 --batch edits.json
-```
-
-### 编辑远程技能文件
-
-```bash
-aic-cli skill edit 42                        # 交互式：列出文件供选择
-aic-cli skill edit 42 SKILL.md              # 直接编辑指定文件
-aic-cli skill edit 42 SKILL.md --dry-run    # 只显示差异，不提交
-```
-
-### 校验技能文件
-
-```bash
-aic-cli skill validate 42                    # 标准校验
-aic-cli skill validate 42 --strict          # 严格模式
-```
-
-### 发布技能
-
-```bash
-aic-cli skill publish 42                     # 发布
-aic-cli skill publish 42 --version 1.0.0    # 指定版本
-aic-cli skill publish 42 --changelog "新增功能"  # 带说明
-```
-
-### 取消发布
-
-```bash
-aic-cli skill unpublish 42
-```
-
-### 更新技能元数据
-
-```bash
-aic-cli skill update 42 --name "新名称"
-aic-cli skill update 42 --desc "新描述"
-aic-cli skill update 42 --tags "go,cli,tool"
-aic-cli skill update 42 --category 2
 ```
 
 ### 添加 skill 到本地
@@ -192,6 +105,101 @@ aic-cli skill pack ./my-skill/ -o output.zip    # 指定输出文件名
 aic-cli skill mode               # 查看当前模式及说明
 aic-cli skill mode symlink       # 切换到 symlink 模式
 aic-cli skill mode copy          # 切换到 copy 模式
+```
+
+## 远程技能管理（AI Agent 专用）
+
+以下命令通过 `aic-cli skill remote` 访问，主要用于 AI Agent 自动化操作。
+
+### 查看远程文件内容
+
+```bash
+aic-cli skill remote cat 42 SKILL.md               # 输出到 stdout
+aic-cli skill remote cat 42 SKILL.md -o local.md   # 保存到本地文件
+```
+
+### 显示远程文件树
+
+```bash
+aic-cli skill remote tree 42
+```
+
+输出示例：
+```
+my-skill (ID: 42)
+├── SKILL.md (1.2KB)
+├── prompts/
+│   ├── review.md (512B)
+│   └── refactor.md (384B)
+└── references/
+    └── api.md (2.1KB)
+```
+
+### 增量编辑技能文件
+
+```bash
+# 纯内容匹配
+aic-cli skill remote patch 42 --path SKILL.md \
+  --old "description: 旧描述" \
+  --new "description: 新描述"
+
+# 行号 + 内容校验（推荐）
+aic-cli skill remote patch 42 --path SKILL.md \
+  --line 5 \
+  --old "description: 旧描述" \
+  --new "description: 新描述"
+
+# 纯行号替换
+aic-cli skill remote patch 42 --path SKILL.md \
+  --line 20-25 \
+  --new "## 新增章节\n\n替换全部内容"
+
+# 通过管道传入 JSON（自动检测）
+echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill remote patch 42
+
+# 批量 patch 多个文件
+aic-cli skill remote patch 42 --batch edits.json
+
+# 查看 JSON 格式说明
+aic-cli skill remote patch --schema
+```
+
+### 编辑远程技能文件
+
+```bash
+aic-cli skill remote edit 42                        # 交互式：列出文件供选择
+aic-cli skill remote edit 42 SKILL.md              # 直接编辑指定文件
+aic-cli skill remote edit 42 SKILL.md --dry-run    # 只显示差异，不提交
+```
+
+### 校验技能文件
+
+```bash
+aic-cli skill remote validate 42                    # 标准校验
+aic-cli skill remote validate 42 --strict          # 严格模式
+```
+
+### 发布技能
+
+```bash
+aic-cli skill remote publish 42                     # 发布
+aic-cli skill remote publish 42 --version 1.0.0    # 指定版本
+aic-cli skill remote publish 42 --changelog "新增功能"  # 带说明
+```
+
+### 取消发布
+
+```bash
+aic-cli skill remote unpublish 42
+```
+
+### 更新技能元数据
+
+```bash
+aic-cli skill remote update 42 --name "新名称"
+aic-cli skill remote update 42 --desc "新描述"
+aic-cli skill remote update 42 --tags "go,cli,tool"
+aic-cli skill remote update 42 --category 2
 ```
 
 ## 技能包管理

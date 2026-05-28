@@ -35,37 +35,37 @@ class TestErrorHandling:
 
     def test_cat_no_args(self):
         """cat 缺少参数"""
-        result = self.cli.run("skill", "cat")
+        result = self.cli.run("skill", "remote", "cat")
         assert_error_output(result)
 
     def test_cat_missing_path(self):
         """cat 缺少 path 参数"""
-        result = self.cli.run("skill", "cat", "1")
+        result = self.cli.run("skill", "remote", "cat", "1")
         assert_error_output(result)
 
     def test_tree_no_args(self):
         """tree 缺少参数"""
-        result = self.cli.run("skill", "tree")
+        result = self.cli.run("skill", "remote", "tree")
         assert_error_output(result)
 
     def test_validate_no_args(self):
         """validate 缺少参数"""
-        result = self.cli.run("skill", "validate")
+        result = self.cli.run("skill", "remote", "validate")
         assert_error_output(result)
 
     def test_publish_no_args(self):
         """publish 缺少参数"""
-        result = self.cli.run("skill", "publish")
+        result = self.cli.run("skill", "remote", "publish")
         assert_error_output(result)
 
     def test_unpublish_no_args(self):
         """unpublish 缺少参数"""
-        result = self.cli.run("skill", "unpublish")
+        result = self.cli.run("skill", "remote", "unpublish")
         assert_error_output(result)
 
     def test_update_no_args(self):
         """update 缺少参数"""
-        result = self.cli.run("skill", "update")
+        result = self.cli.run("skill", "remote", "update")
         assert_error_output(result)
 
     # ========== 无效 ID ==========
@@ -140,22 +140,22 @@ class TestErrorHandling:
 
     def test_patch_missing_required_args(self):
         """patch 缺少必需参数"""
-        result = self.cli.run("skill", "patch", "1")
+        result = self.cli.run("skill", "remote", "patch", "1")
         assert_error_output(result)
 
     def test_patch_missing_path(self):
         """patch 缺少 path"""
-        result = self.cli.run("skill", "patch", "1", "--old", "test", "--new", "new")
+        result = self.cli.run("skill", "remote", "patch", "1", "--old", "test", "--new", "new")
         assert_error_output(result)
 
     def test_patch_missing_old_and_line(self):
         """patch 缺少 old 和 line"""
-        result = self.cli.run("skill", "patch", "1", "--path", "SKILL.md", "--new", "new")
+        result = self.cli.run("skill", "remote", "patch", "1", "--path", "SKILL.md", "--new", "new")
         assert_error_output(result)
 
     def test_patch_missing_new(self):
         """patch 缺少 new"""
-        result = self.cli.run("skill", "patch", "1", "--path", "SKILL.md", "--old", "test")
+        result = self.cli.run("skill", "remote", "patch", "1", "--path", "SKILL.md", "--old", "test")
         assert_error_output(result)
 
     def test_patch_invalid_line_number(self):

@@ -22,25 +22,25 @@ class TestEditBasic:
 
     def test_edit_help(self):
         """测试 edit 命令帮助"""
-        result = self.cli.run("skill", "edit", "--help")
+        result = self.cli.run("skill", "remote", "edit", "--help")
         assert_success_output(result)
         assert_output_contains(result, "编辑远程技能文件")
         assert_output_contains(result, "--dry-run")
 
     def test_edit_no_args(self):
         """测试 edit 缺少参数"""
-        result = self.cli.run("skill", "edit")
+        result = self.cli.run("skill", "remote", "edit")
         assert_error_output(result)
 
     def test_edit_invalid_skill_id(self):
         """测试无效技能 ID"""
         # edit 是交互式的，这里测试参数验证
-        result = self.cli.run("skill", "edit", "abc")
+        result = self.cli.run("skill", "remote", "edit", "abc")
         assert_error_output(result)
 
     def test_edit_dry_run_help(self):
         """测试 dry-run 选项在帮助中"""
-        result = self.cli.run("skill", "edit", "--help")
+        result = self.cli.run("skill", "remote", "edit", "--help")
         assert_success_output(result)
         assert_output_contains(result, "--dry-run")
 

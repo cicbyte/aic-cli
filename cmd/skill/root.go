@@ -9,29 +9,15 @@ import (
 func GetSkillCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "skill",
-		Short: "管理 Claude Skills",
-		Long: `管理 Claude Skills 的搜索、下载、安装、导入、打包等操作。
+		Short: "管理 Skills",
+		Long: `管理 Skills 的搜索、下载、安装、导入、打包等操作。
 
-远程操作:
+常用命令:
   search     搜索远程技能
   add        下载并安装技能
   download   下载技能 ZIP 包
   import     导入本地技能到服务器
   categories 列出所有分类
-
-文件操作:
-  cat        查看远程文件内容
-  tree       显示远程技能文件树
-  edit       编辑远程技能文件
-  patch      增量编辑技能文件
-
-校验与发布:
-  validate   校验技能文件
-  publish    发布技能
-  unpublish  取消发布
-
-元数据:
-  update     更新技能元数据
 
 本地管理:
   list       列出已安装的技能
@@ -39,29 +25,18 @@ func GetSkillCommand() *cobra.Command {
   clean      清理失效的软链接
 
 打包:
-  pack       将技能文件夹打包为 .zip 或 .skill`,
+  pack       将技能文件夹打包为 .zip 或 .skill
+
+远程管理 (AI Agent):
+  remote     远程技能的细粒度操作（cat/tree/patch/validate/publish）`,
 	}
 
-	// 远程操作
+	// 常用命令
 	cmd.AddCommand(GetSearchCommand())
 	cmd.AddCommand(GetAddCommand())
 	cmd.AddCommand(GetDownloadCommand())
 	cmd.AddCommand(GetImportCommand())
 	cmd.AddCommand(GetCategoriesCommand())
-
-	// 文件操作
-	cmd.AddCommand(catCmd)
-	cmd.AddCommand(treeCmd)
-	cmd.AddCommand(editCmd)
-	cmd.AddCommand(patchCmd)
-
-	// 校验与发布
-	cmd.AddCommand(validateCmd)
-	cmd.AddCommand(publishCmd)
-	cmd.AddCommand(unpublishCmd)
-
-	// 元数据
-	cmd.AddCommand(updateCmd)
 
 	// 本地管理
 	cmd.AddCommand(local.GetListCommand())
@@ -73,6 +48,9 @@ func GetSkillCommand() *cobra.Command {
 
 	// 模式管理
 	cmd.AddCommand(modeCmd)
+
+	// 远程管理（AI Agent 专用）
+	cmd.AddCommand(GetRemoteCommand())
 
 	return cmd
 }

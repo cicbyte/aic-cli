@@ -246,7 +246,7 @@ class TestSkillLifecycle:
 
     def test_19_error_patch_no_args(self):
         """测试 patch 缺少参数"""
-        result = self.cli.run("skill", "patch", "1")
+        result = self.cli.run("skill", "remote", "patch", "1")
         assert_error_output(result)
 
     def test_20_error_update_no_fields(self):
