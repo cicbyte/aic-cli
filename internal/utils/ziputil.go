@@ -83,6 +83,7 @@ func ZipDir(dir, outputPath string) error {
 		if err != nil {
 			return err
 		}
+		relPath = filepath.ToSlash(relPath)
 
 		if info.IsDir() {
 			_, err = zipWriter.Create(relPath + "/")
