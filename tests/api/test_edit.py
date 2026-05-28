@@ -43,25 +43,3 @@ class TestEditBasic:
         result = self.cli.run("skill", "remote", "edit", "--help")
         assert_success_output(result)
         assert_output_contains(result, "--dry-run")
-
-
-class TestEditInteractive:
-    """Edit 交互式测试（需要模拟用户输入）"""
-
-    @pytest.fixture(autouse=True)
-    def setup(self, cli, test_data):
-        self.cli = cli
-        self.test_data = test_data
-        self.skill_id = test_data["skills"]["existing_skill_id"]
-
-    @pytest.mark.skip(reason="交互式命令需要模拟用户输入，暂跳过")
-    def test_edit_select_file(self):
-        """测试文件选择交互"""
-        # 这个测试需要模拟用户输入，暂跳过
-        pass
-
-    @pytest.mark.skip(reason="交互式命令需要打开编辑器，暂跳过")
-    def test_edit_open_editor(self):
-        """测试打开编辑器"""
-        # 这个测试需要打开编辑器，暂跳过
-        pass
