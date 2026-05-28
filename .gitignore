@@ -27,3 +27,6 @@ __pycache__/
 rewrite.json
 docs/
 msg.txt
+
+.scratch/
+dev-docs/

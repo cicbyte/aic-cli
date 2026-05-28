@@ -19,6 +19,20 @@ func GetSkillCommand() *cobra.Command {
   import     导入本地技能到服务器
   categories 列出所有分类
 
+文件操作:
+  cat        查看远程文件内容
+  tree       显示远程技能文件树
+  edit       编辑远程技能文件
+  patch      增量编辑技能文件
+
+校验与发布:
+  validate   校验技能文件
+  publish    发布技能
+  unpublish  取消发布
+
+元数据:
+  update     更新技能元数据
+
 本地管理:
   list       列出已安装的技能
   remove     移除已安装的技能
@@ -34,6 +48,20 @@ func GetSkillCommand() *cobra.Command {
 	cmd.AddCommand(GetDownloadCommand())
 	cmd.AddCommand(GetImportCommand())
 	cmd.AddCommand(GetCategoriesCommand())
+
+	// 文件操作
+	cmd.AddCommand(catCmd)
+	cmd.AddCommand(treeCmd)
+	cmd.AddCommand(editCmd)
+	cmd.AddCommand(patchCmd)
+
+	// 校验与发布
+	cmd.AddCommand(validateCmd)
+	cmd.AddCommand(publishCmd)
+	cmd.AddCommand(unpublishCmd)
+
+	// 元数据
+	cmd.AddCommand(updateCmd)
 
 	// 本地管理
 	cmd.AddCommand(local.GetListCommand())

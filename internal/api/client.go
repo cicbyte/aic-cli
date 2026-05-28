@@ -54,6 +54,8 @@ type FileNode struct {
 	Path     string     `json:"path"`
 	Type     string     `json:"type"`
 	Content  string     `json:"content,omitempty"`
+	Size     int64      `json:"size,omitempty"`
+	Sha256   string     `json:"sha256,omitempty"`
 	Children []FileNode `json:"children,omitempty"`
 }
 
@@ -151,6 +153,139 @@ type PackageDetailResponse struct {
 type PackageActionResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+// 单文件操作相关类型
+type FileContent struct {
+	Path      string `json:"path"`
+	Content   string `json:"content"`
+	Size      int64  `json:"size"`
+	Sha256    string `json:"sha256"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type FileContentResponse struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    FileContent `json:"data"`
+}
+
+type PutFileRequest struct {
+	Path           string `json:"path"`
+	Content        string `json:"content"`
+	ExpectedSha256 string `json:"expectedSha256,omitempty"`
+}
+
+type PutFileResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Path   string `json:"path"`
+		Size   int64  `json:"size"`
+		Sha256 string `json:"sha256"`
+	} `json:"data"`
+}
+
+type PatchEdit struct {
+	OldString  string `json:"old_string,omitempty"`
+	NewString  string `json:"new_string"`
+	ReplaceAll bool   `json:"replace_all,omitempty"`
+	LineStart  *int   `json:"line_start,omitempty"`
+	LineEnd    *int   `json:"line_end,omitempty"`
+}
+
+type PatchFileRequest struct {
+	Path           string      `json:"path"`
+	ExpectedSha256 string      `json:"expectedSha256,omitempty"`
+	Edits          []PatchEdit `json:"edits"`
+}
+
+type PatchFileResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Path              string `json:"path"`
+		Replacements      []int  `json:"replacements"`
+		TotalReplacements int    `json:"totalReplacements"`
+		Sha256            string `json:"sha256"`
+	} `json:"data"`
+}
+
+type ValidateResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Valid    bool     `json:"valid"`
+		Errors   []string `json:"errors"`
+		Warnings []string `json:"warnings"`
+	} `json:"data"`
+}
+
+type PublishRequest struct {
+	Version   string `json:"version,omitempty"`
+	Changelog string `json:"changelog,omitempty"`
+}
+
+type PublishResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		SkillId int    `json:"skillId"`
+		Version string `json:"version"`
+		Status  string `json:"status"`
+	} `json:"data"`
+}
+
+type CreateSkillRequest struct {
+	Name        string     `json:"name"`
+	Description string     `json:"description,omitempty"`
+	CategoryId  int        `json:"categoryId,omitempty"`
+	Tags        []string   `json:"tags,omitempty"`
+	Files       []FileNode `json:"files,omitempty"`
+}
+
+type CreateSkillResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		SkillId int `json:"skillId"`
+	} `json:"data"`
+}
+
+type UpdateSkillRequest struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	CategoryId  int    `json:"categoryId,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+}
+
+type BatchOperation struct {
+	Op      string      `json:"op"`
+	Path    string      `json:"path"`
+	Content string      `json:"content,omitempty"`
+	Edits   []PatchEdit `json:"edits,omitempty"`
+	OldPath string      `json:"oldPath,omitempty"`
+	NewPath string      `json:"newPath,omitempty"`
+}
+
+type BatchRequest struct {
+	Operations []BatchOperation `json:"operations"`
+}
+
+type BatchResult struct {
+	Op           string `json:"op"`
+	Path         string `json:"path"`
+	Sha256       string `json:"sha256,omitempty"`
+	Replacements []int  `json:"replacements,omitempty"`
+}
+
+type BatchResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Results []BatchResult `json:"results"`
+	} `json:"data"`
 }
 
 func NewClient(baseURL, token string) *Client {
@@ -439,6 +574,193 @@ func (c *Client) GetPackageDetail(id int) (*PackageDetailResponse, error) {
 
 	var result PackageDetailResponse
 	if err := c.doRequest(req, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// ========== 单文件操作 API ==========
+
+// GetFile 读取单个技能文件
+func (c *Client) GetFile(skillID int, path string) (*FileContentResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/file?path=%s", c.BaseURL, skillID, path)
+
+	req, err := c.newAuthRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var result FileContentResponse
+	if err := c.doRequest(req, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// PutFile 创建或更新单个技能文件
+func (c *Client) PutFile(skillID int, req *PutFileRequest) (*PutFileResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/file", c.BaseURL, skillID)
+
+	body, _ := json.Marshal(req)
+	httpReq, err := c.newAuthRequest("PUT", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	var result PutFileResponse
+	if err := c.doRequest(httpReq, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// PatchFile 增量编辑技能文件
+func (c *Client) PatchFile(skillID int, req *PatchFileRequest) (*PatchFileResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/file", c.BaseURL, skillID)
+
+	body, _ := json.Marshal(req)
+	httpReq, err := c.newAuthRequest("PATCH", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	var result PatchFileResponse
+	if err := c.doRequest(httpReq, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// DeleteFile 删除单个技能文件
+func (c *Client) DeleteFile(skillID int, path string) error {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/file?path=%s", c.BaseURL, skillID, path)
+
+	req, err := c.newAuthRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	return c.doRequest(req, &result)
+}
+
+// ========== 校验与发布 API ==========
+
+// Validate 校验技能文件
+func (c *Client) Validate(skillID int, strict bool) (*ValidateResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/validate", c.BaseURL, skillID)
+
+	body, _ := json.Marshal(map[string]bool{"strict": strict})
+	req, err := c.newAuthRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	var result ValidateResponse
+	if err := c.doRequest(req, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// Publish 发布技能
+func (c *Client) Publish(skillID int, req *PublishRequest) (*PublishResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/publish", c.BaseURL, skillID)
+
+	body, _ := json.Marshal(req)
+	httpReq, err := c.newAuthRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	var result PublishResponse
+	if err := c.doRequest(httpReq, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// Unpublish 取消发布技能
+func (c *Client) Unpublish(skillID int) error {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/unpublish", c.BaseURL, skillID)
+
+	req, err := c.newAuthRequest("POST", url, nil)
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	return c.doRequest(req, &result)
+}
+
+// ========== 增强 API ==========
+
+// CreateSkill 创建技能（支持初始文件）
+func (c *Client) CreateSkill(req *CreateSkillRequest) (*CreateSkillResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/create", c.BaseURL)
+
+	body, _ := json.Marshal(req)
+	httpReq, err := c.newAuthRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	var result CreateSkillResponse
+	if err := c.doRequest(httpReq, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// UpdateSkill 更新技能元数据
+func (c *Client) UpdateSkill(req *UpdateSkillRequest) error {
+	url := fmt.Sprintf("%s/api/v1/skills/update", c.BaseURL)
+
+	body, _ := json.Marshal(req)
+	httpReq, err := c.newAuthRequest("PUT", url, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	var result struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	return c.doRequest(httpReq, &result)
+}
+
+// BatchFiles 批量文件操作
+func (c *Client) BatchFiles(skillID int, req *BatchRequest) (*BatchResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/skills/%d/files/batch", c.BaseURL, skillID)
+
+	body, _ := json.Marshal(req)
+	httpReq, err := c.newAuthRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	var result BatchResponse
+	if err := c.doRequest(httpReq, &result); err != nil {
 		return nil, err
 	}
 

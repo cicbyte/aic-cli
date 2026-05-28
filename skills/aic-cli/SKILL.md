@@ -29,6 +29,94 @@ aic-cli skill search "前端" -c 1        # 按分类筛选
 aic-cli skill search "react" -p 1 -n 10 # 分页
 ```
 
+### 查看远程文件内容
+
+```bash
+aic-cli skill cat 42 SKILL.md               # 输出到 stdout
+aic-cli skill cat 42 SKILL.md -o local.md   # 保存到本地文件
+```
+
+### 显示远程文件树
+
+```bash
+aic-cli skill tree 42
+```
+
+输出示例：
+```
+my-skill (ID: 42)
+├── SKILL.md (1.2KB)
+├── prompts/
+│   ├── review.md (512B)
+│   └── refactor.md (384B)
+└── references/
+    └── api.md (2.1KB)
+```
+
+### 增量编辑技能文件
+
+```bash
+# 纯内容匹配
+aic-cli skill patch 42 --path SKILL.md \
+  --old "description: 旧描述" \
+  --new "description: 新描述"
+
+# 行号 + 内容校验（推荐）
+aic-cli skill patch 42 --path SKILL.md \
+  --line 5 \
+  --old "description: 旧描述" \
+  --new "description: 新描述"
+
+# 纯行号替换
+aic-cli skill patch 42 --path SKILL.md \
+  --line 20-25 \
+  --new "## 新增章节\n\n替换全部内容"
+
+# 通过 stdin 传入 JSON
+echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill patch 42 --stdin
+
+# 批量 patch 多个文件
+aic-cli skill patch 42 --batch edits.json
+```
+
+### 编辑远程技能文件
+
+```bash
+aic-cli skill edit 42                        # 交互式：列出文件供选择
+aic-cli skill edit 42 SKILL.md              # 直接编辑指定文件
+aic-cli skill edit 42 SKILL.md --dry-run    # 只显示差异，不提交
+```
+
+### 校验技能文件
+
+```bash
+aic-cli skill validate 42                    # 标准校验
+aic-cli skill validate 42 --strict          # 严格模式
+```
+
+### 发布技能
+
+```bash
+aic-cli skill publish 42                     # 发布
+aic-cli skill publish 42 --version 1.0.0    # 指定版本
+aic-cli skill publish 42 --changelog "新增功能"  # 带说明
+```
+
+### 取消发布
+
+```bash
+aic-cli skill unpublish 42
+```
+
+### 更新技能元数据
+
+```bash
+aic-cli skill update 42 --name "新名称"
+aic-cli skill update 42 --desc "新描述"
+aic-cli skill update 42 --tags "go,cli,tool"
+aic-cli skill update 42 --category 2
+```
+
 ### 添加 skill 到本地
 
 ```bash
