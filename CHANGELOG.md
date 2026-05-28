@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.0.3] - 2026-05-28
+
+### Fixes
+
+- 修复 `skill import` 在 Windows 上 zip 内路径使用反斜杠导致服务端目录结构丢失的问题
+- 修复 `server login` 输入带尾部斜杠的 URL 后请求地址异常的问题
+
+### Docs
+
+- 更新中英文 README，补充 AIC 仓库关联说明
+
+## [0.0.2] - 2026-05-27
+
+### Fixes
+
+- 修复 `gen_release_notes.py` 在 Windows 中文系统下的 GBK 编码问题
+
+### CI
+
+- 重构 release 相关脚本代码
+- 优化 GitHub Release 工作流，修正模块路径和输出文件名
+
+### Docs
+
+- 更新项目说明文档，补充 AIC CLI 介绍
+
+### Fixes
+
+- 修复 `skill import` 在 Windows 上 zip 内路径使用反斜杠导致服务端目录结构丢失的问题
+- 修复 `server login` 输入带尾部斜杠的 URL 后请求地址异常的问题
+
+### CI
+
+- 优化 GitHub Release 工作流，修正模块路径和输出文件名
+- 修复 `gen_release_notes.py` 在 Windows 中文系统下的编码问题
+
+### Docs
+
+- 更新中英文 README，补充 AIC 仓库关联说明
+- 维护 CHANGELOG
+
 ## [0.0.1] - 2026-05-27
 
 ### Features
