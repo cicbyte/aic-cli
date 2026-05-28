@@ -85,12 +85,22 @@ class AicCliClient:
     def skill_patch(self, skill_id: int, path: str = None, old: str = None, new: str = None,
                     line: str = None, replace_all: bool = False, stdin: str = None,
                     batch: str = None) -> CliResult:
-        """增量编辑技能文件"""
+        """增量编辑技能文件
+
+        Args:
+            skill_id: 技能 ID
+            path: 文件路径
+            old: 要替换的原始文本
+            new: 替换后的文本
+            line: 行号范围 (如: "5" 或 "20-25")
+            replace_all: 替换所有匹配
+            stdin: 通过管道传入的 JSON 数据（自动检测）
+            batch: 批量操作 JSON 文件
+        """
         args = ["skill", "patch", str(skill_id)]
 
-        # stdin 模式（包括空字符串，用于测试错误处理）
+        # 管道模式：通过 input_data 传入
         if stdin is not None:
-            args.append("--stdin")
             return self.run(*args, input_data=stdin)
 
         # batch 模式
@@ -100,7 +110,7 @@ class AicCliClient:
 
         # 普通模式需要 path
         if not path:
-            raise ValueError("path 参数是必需的（除非使用 stdin 或 batch 模式）")
+            raise ValueError("path 参数是必需的（除非使用管道或 batch 模式）")
 
         args.extend(["--path", path])
         if old:

@@ -34,8 +34,8 @@ var patchCmd = &cobra.Command{
     --line 20-25 \
     --new "## 新增章节\n\n替换全部内容"
 
-  # 通过 stdin 传入 JSON
-  echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill patch 42 --stdin
+  # 通过管道传入 JSON（自动检测）
+  echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill patch 42
 
   # 批量 patch 多个文件
   aic-cli skill patch 42 --batch edits.json`,
@@ -48,20 +48,28 @@ var patchCmd = &cobra.Command{
 
 		client := api.NewClient(common.AppConfigModel.AIC.BaseURL, common.AppConfigModel.AIC.Token)
 
-		// 检查是否使用 stdin
-		useStdin, _ := cmd.Flags().GetBool("stdin")
-		batchFile, _ := cmd.Flags().GetString("batch")
-
-		if useStdin {
+		// 自动检测管道输入
+		if hasStdinData() {
 			return patchFromStdin(client, skillID)
 		}
 
+		batchFile, _ := cmd.Flags().GetString("batch")
 		if batchFile != "" {
 			return patchFromBatchFile(client, skillID, batchFile)
 		}
 
 		return patchFromFlags(client, skillID, cmd)
 	},
+}
+
+// hasStdinData 检测 stdin 是否有管道数据
+func hasStdinData() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+	// 检查是否是管道或重定向
+	return (stat.Mode() & os.ModeCharDevice) == 0
 }
 
 func patchFromStdin(client *api.Client, skillID int) error {
@@ -176,6 +184,5 @@ func init() {
 	patchCmd.Flags().String("new", "", "替换后的文本")
 	patchCmd.Flags().String("line", "", "行号范围 (如: 5 或 20-25)")
 	patchCmd.Flags().Bool("replace-all", false, "替换所有匹配")
-	patchCmd.Flags().Bool("stdin", false, "从 stdin 读取 JSON")
 	patchCmd.Flags().String("batch", "", "批量操作 JSON 文件")
 }
