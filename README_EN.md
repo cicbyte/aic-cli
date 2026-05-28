@@ -1,26 +1,28 @@
 # AIC CLI
 
-> 🚀 Command Line Tool for Managing Coding Agent Skills — Search, Install, Manage, All-in-One
+> Command Line Tool for Managing Coding Agent Skills — Search, Install, Manage, All-in-One
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/cicbyte/aic-cli)](https://goreportcard.com/report/github.com/cicbyte/aic-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.23.2-blue)](https://go.dev/dl/)
 
-**[🇨🇳 中文版](README.md)** | **[🇺🇸 English](README_EN.md)**
+**[中文版](README.md)** | **[English](README_EN.md)**
 
 > AIC CLI is the companion CLI for [AIC](https://github.com/cicbyte/aic) — an open platform for Coding Agent Skills. AIC CLI handles searching, installing, and managing skills from the terminal.
 
-## ✨ Features
+## Features
 
-- **🔍 Smart Search** — Quickly search skills from AIC server with keyword and category filtering
-- **📦 One-Click Install** — Download and install to project or global directory automatically
-- **🤖 Multi-Agent Support** — Supports 18 Coding Agents (Claude Code, Cursor, Windsurf, Cline, etc.)
-- **🎨 Beautiful TUI** — Built-in interactive terminal interface for visual browsing
-- **🗂️ Skill Packages** — Install skills in bulk via packages
-- **🔗 Symlinks** — Share skills across projects with symlink management, saving disk space
-- **🧹 Cleanup** — Auto-clean broken symlinks to keep your environment tidy
+- **Smart Search** — Quickly search skills from AIC server with keyword and category filtering
+- **One-Click Install** — Download and install to project or global directory automatically
+- **Multi-Agent Support** — Supports 18 Coding Agents (Claude Code, Cursor, Windsurf, Cline, etc.)
+- **Beautiful TUI** — Built-in interactive terminal interface for visual browsing
+- **Skill Packages** — Install skills in bulk via packages
+- **Symlinks** — Share skills across projects with symlink management, saving disk space
+- **Cleanup** — Auto-clean broken symlinks to keep your environment tidy
+- **Skill Creation** — Create new skills and upload to server
+- **Remote Management** — AI Agent specific: file read/write, incremental editing, validation, publishing
 
-## 📦 Installation
+## Installation
 
 ### Requirements
 
@@ -45,7 +47,7 @@ go install github.com/cicbyte/aic-cli@latest
 
 Visit the [Releases](https://github.com/cicbyte/aic-cli/releases) page to download the binary for your system.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Interactive TUI mode (recommended)
@@ -64,7 +66,7 @@ aic-cli package add 1
 aic-cli skill list
 ```
 
-## 📖 Usage
+## Usage
 
 ### Skill Management
 
@@ -142,6 +144,61 @@ aic-cli skill mode symlink       # Switch to symlink mode
 aic-cli skill mode copy          # Switch to copy mode
 ```
 
+### Create Skills
+
+```bash
+# Interactive creation
+aic-cli skill create
+
+# Create with name
+aic-cli skill create my-skill
+
+# Full options
+aic-cli skill create my-skill --category 1 --tags "go,cli" --desc "My skill"
+```
+
+### Remote Skill Management (AI Agent)
+
+#### View Files
+
+```bash
+aic-cli skill remote cat 42 SKILL.md           # View file content
+aic-cli skill remote cat 42 SKILL.md -o local.md  # Save to local
+aic-cli skill remote tree 42                   # Show file tree
+```
+
+#### Incremental Editing
+
+```bash
+# Content matching
+aic-cli skill remote patch 42 --path SKILL.md --old "old content" --new "new content"
+
+# Line number + content validation (recommended)
+aic-cli skill remote patch 42 --path SKILL.md --line 5 --old "old" --new "new"
+
+# Pipe JSON
+echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill remote patch 42
+
+# Batch operations
+aic-cli skill remote patch 42 --batch edits.json
+```
+
+#### Validate & Publish
+
+```bash
+aic-cli skill remote validate 42               # Validate skill
+aic-cli skill remote publish 42 --version 1.0.0  # Publish skill
+aic-cli skill remote unpublish 42              # Unpublish skill
+```
+
+#### Update Metadata
+
+```bash
+aic-cli skill remote update 42 --name "New Name"
+aic-cli skill remote update 42 --desc "New Description"
+aic-cli skill remote update 42 --tags "tag1,tag2"
+```
+
 ### Skill Packages
 
 ```bash
@@ -174,19 +231,28 @@ aic-cli --help
 | `skill add` | Download and install skills |
 | `skill download` | Download skill ZIP package |
 | `skill import` | Import local skills to server |
+| `skill create` | Create new skill |
 | `skill categories` | List all categories |
 | `skill list` | List installed skills |
 | `skill remove` | Remove installed skills |
 | `skill clean` | Clean broken symlinks |
 | `skill pack` | Package skill folder |
 | `skill mode` | View or switch install mode |
+| `skill remote cat` | View remote file content |
+| `skill remote tree` | Show remote file tree |
+| `skill remote patch` | Incremental file editing |
+| `skill remote edit` | Interactive file editing |
+| `skill remote validate` | Validate skill files |
+| `skill remote publish` | Publish skill |
+| `skill remote unpublish` | Unpublish skill |
+| `skill remote update` | Update skill metadata |
 | `package list` | List skill packages |
 | `package add` | Install all skills in a package |
 | `server open` | Open AIC web page |
 | `server status` | Check server status |
 | `tui` | Interactive interface |
 
-## 🤖 Multi-Agent Support
+## Multi-Agent Support
 
 AIC CLI can install skills into different Coding Agent directories. Use `--agent` to specify the target:
 
@@ -220,7 +286,7 @@ Supported Agents:
 
 When `--agent` is not specified, AIC CLI auto-detects agents in the current project, prompts for selection if multiple are found, and defaults to Claude Code.
 
-## ⚙️ Configuration
+## Configuration
 
 ### Config File
 
@@ -241,12 +307,12 @@ skills:
 - **symlink** (default) — Downloads to global directory, creates a symlink in the target. Shared across projects, saves disk space. Uses Junction on Windows (no admin required).
 - **copy** — Copies files directly to the target directory. Each project has its own independent copy.
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 aic-cli/
 ├── cmd/                  # CLI commands (Cobra)
-│   ├── skill/            # skill subcommands
+│   ├── skill/            # skill subcommands (search/add/create/remote)
 │   ├── package/          # package subcommands
 │   ├── server/           # server subcommands
 │   ├── local/            # list/remove/clean
@@ -260,25 +326,50 @@ aic-cli/
 │   ├── models/           # Data models
 │   └── log/              # Logging module
 ├── skills/               # Built-in project skills
+│   ├── aic-cli/          # User guide
+│   └── aic-author/       # Author guide
+├── tests/                # Integration tests
+│   ├── api/              # API tests
+│   ├── helpers/          # Test helpers
+│   └── data/             # Test data
 └── main.go
 ```
 
-## 🛠️ Development
+## Development
 
 ```bash
 # Build
 go build -o aic-cli main.go
 
-# Test
+# Code check
 go vet ./...
-go test ./...
+
+# Run tests (requires aic server running)
+cd tests
+uv sync
+uv run pytest -v
 ```
 
-## 📄 License
+### Tests
+
+The project uses pytest for integration tests. See [tests/README.md](tests/README.md) for details.
+
+```bash
+# Run all tests
+uv run pytest -v
+
+# Run specific test
+uv run pytest api/test_skills.py -v
+
+# Check test coverage
+uv run pytest --tb=short
+```
+
+## License
 
 [MIT](LICENSE) © 2026 Cicbyte
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Cobra](https://github.com/spf13/cobra) — CLI framework
 - [Bubbletea](https://github.com/charmbracelet/bubbletea) — TUI framework

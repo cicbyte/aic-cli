@@ -1,26 +1,28 @@
 # AIC CLI
 
-> 🚀 管理 Coding Agent Skills 的命令行工具 — 搜索、安装、管理，一站式解决方案
+> 管理 Coding Agent Skills 的命令行工具 — 搜索、安装、管理，一站式解决方案
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/cicbyte/aic-cli)](https://goreportcard.com/report/github.com/cicbyte/aic-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.23.2-blue)](https://go.dev/dl/)
 
-**[🇨🇳 中文版](README.md)** | **[🇺🇸 English](README_EN.md)**
+**[中文版](README.md)** | **[English](README_EN.md)**
 
 > AIC CLI 是 [AIC](https://github.com/cicbyte/aic) 的配套命令行工具。AIC 是 Coding Agent Skills 的开放平台，AIC CLI 负责在终端中搜索、安装和管理这些 skills。
 
-## ✨ 功能特性
+## 功能特性
 
-- **🔍 智能搜索** — 从 AIC 服务器快速搜索 skills，支持关键词和分类筛选
-- **📦 一键安装** — 下载并自动安装到项目或全局目录
-- **🤖 多 Agent 支持** — 支持 18 种 Coding Agent（Claude Code、Cursor、Windsurf、Cline 等）
-- **🎨 精美 TUI** — 内置交互式终端界面，可视化浏览和操作
-- **🗂️ 技能包** — 按技能包批量安装，一键配齐开发环境
-- **🔗 符号链接** — 支持软链接管理，多项目共享同一份 skill，节省存储空间
-- **🧹 清理工具** — 自动清理失效的软链接，保持环境整洁
+- **智能搜索** — 从 AIC 服务器快速搜索 skills，支持关键词和分类筛选
+- **一键安装** — 下载并自动安装到项目或全局目录
+- **多 Agent 支持** — 支持 18 种 Coding Agent（Claude Code、Cursor、Windsurf、Cline 等）
+- **精美 TUI** — 内置交互式终端界面，可视化浏览和操作
+- **技能包** — 按技能包批量安装，一键配齐开发环境
+- **符号链接** — 支持软链接管理，多项目共享同一份 skill，节省存储空间
+- **清理工具** — 自动清理失效的软链接，保持环境整洁
+- **技能创建** — 创建新技能并上传到服务器
+- **远程管理** — AI Agent 专用：文件读写、增量编辑、校验、发布
 
-## 📦 安装
+## 安装
 
 ### 环境要求
 
@@ -45,7 +47,7 @@ go install github.com/cicbyte/aic-cli@latest
 
 访问 [Releases](https://github.com/cicbyte/aic-cli/releases) 页面下载适合你系统的二进制文件。
 
-## 🚀 快速开始
+## 快速开始
 
 ```bash
 # 交互式 TUI 界面（推荐）
@@ -64,7 +66,7 @@ aic-cli package add 1
 aic-cli skill list
 ```
 
-## 📖 使用方法
+## 使用方法
 
 ### Skill 管理
 
@@ -142,6 +144,61 @@ aic-cli skill mode symlink       # 切换到 symlink 模式
 aic-cli skill mode copy          # 切换到 copy 模式
 ```
 
+### 创建技能
+
+```bash
+# 交互式创建
+aic-cli skill create
+
+# 指定名称创建
+aic-cli skill create my-skill
+
+# 完整选项
+aic-cli skill create my-skill --category 1 --tags "go,cli" --desc "我的技能"
+```
+
+### 远程技能管理（AI Agent 专用）
+
+#### 查看文件
+
+```bash
+aic-cli skill remote cat 42 SKILL.md           # 查看文件内容
+aic-cli skill remote cat 42 SKILL.md -o local.md  # 保存到本地
+aic-cli skill remote tree 42                   # 查看文件树
+```
+
+#### 增量编辑
+
+```bash
+# 内容匹配
+aic-cli skill remote patch 42 --path SKILL.md --old "旧内容" --new "新内容"
+
+# 行号 + 内容校验（推荐）
+aic-cli skill remote patch 42 --path SKILL.md --line 5 --old "旧" --new "新"
+
+# 管道 JSON
+echo '{"path":"SKILL.md","edits":[...]}' | aic-cli skill remote patch 42
+
+# 批量操作
+aic-cli skill remote patch 42 --batch edits.json
+```
+
+#### 校验与发布
+
+```bash
+aic-cli skill remote validate 42               # 校验技能
+aic-cli skill remote publish 42 --version 1.0.0  # 发布技能
+aic-cli skill remote unpublish 42              # 取消发布
+```
+
+#### 更新元数据
+
+```bash
+aic-cli skill remote update 42 --name "新名称"
+aic-cli skill remote update 42 --desc "新描述"
+aic-cli skill remote update 42 --tags "tag1,tag2"
+```
+
 ### 技能包管理
 
 ```bash
@@ -174,19 +231,28 @@ aic-cli --help
 | `skill add` | 下载并安装技能 |
 | `skill download` | 下载技能 ZIP 包 |
 | `skill import` | 导入本地技能到服务器 |
+| `skill create` | 创建新技能 |
 | `skill categories` | 列出所有分类 |
 | `skill list` | 列出已安装的技能 |
 | `skill remove` | 移除已安装的技能 |
 | `skill clean` | 清理失效的软链接 |
 | `skill pack` | 打包技能文件夹 |
 | `skill mode` | 查看或切换安装模式 |
+| `skill remote cat` | 查看远程文件内容 |
+| `skill remote tree` | 显示远程文件树 |
+| `skill remote patch` | 增量编辑文件 |
+| `skill remote edit` | 交互式编辑文件 |
+| `skill remote validate` | 校验技能文件 |
+| `skill remote publish` | 发布技能 |
+| `skill remote unpublish` | 取消发布 |
+| `skill remote update` | 更新技能元数据 |
 | `package list` | 列出技能包 |
 | `package add` | 安装技能包中的所有技能 |
 | `server open` | 打开 AIC 服务页面 |
 | `server status` | 查看服务器状态 |
 | `tui` | 交互式界面 |
 
-## 🤖 多 Agent 支持
+## 多 Agent 支持
 
 AIC CLI 支持将 skill 安装到不同 Coding Agent 的目录中。使用 `--agent` 参数指定目标 Agent：
 
@@ -220,7 +286,7 @@ aic-cli skill add "react-helper" --agent windsurf
 
 不指定 `--agent` 时，自动检测当前项目的 Agent，多个时交互选择，默认使用 Claude Code。
 
-## ⚙️ 配置
+## 配置
 
 ### 配置文件
 
@@ -241,12 +307,12 @@ skills:
 - **symlink**（默认）— 下载到全局目录，创建软连接到目标目录。多项目共享，节省磁盘空间。Windows 使用 Junction，无需管理员权限。
 - **copy** — 直接复制文件到目标目录。各项目独立，互不影响。
 
-## 🏗️ 项目结构
+## 项目结构
 
 ```
 aic-cli/
 ├── cmd/                  # CLI 命令定义（Cobra）
-│   ├── skill/            # skill 子命令
+│   ├── skill/            # skill 子命令（search/add/create/remote）
 │   ├── package/          # package 子命令
 │   ├── server/           # server 子命令
 │   ├── local/            # list/remove/clean
@@ -260,25 +326,50 @@ aic-cli/
 │   ├── models/           # 数据模型
 │   └── log/              # 日志模块
 ├── skills/               # 项目内置 skills
+│   ├── aic-cli/          # 使用者指南
+│   └── aic-author/       # 创建者指南
+├── tests/                # 集成测试
+│   ├── api/              # API 测试
+│   ├── helpers/          # 测试辅助
+│   └── data/             # 测试数据
 └── main.go
 ```
 
-## 🛠️ 开发
+## 开发
 
 ```bash
 # 构建
 go build -o aic-cli main.go
 
-# 测试
+# 代码检查
 go vet ./...
-go test ./...
+
+# 运行测试（需要 aic 服务器运行中）
+cd tests
+uv sync
+uv run pytest -v
 ```
 
-## 📄 开源许可证
+### 测试
+
+项目使用 pytest 进行集成测试，详见 [tests/README.md](tests/README.md)。
+
+```bash
+# 运行所有测试
+uv run pytest -v
+
+# 运行指定测试
+uv run pytest api/test_skills.py -v
+
+# 查看测试覆盖率
+uv run pytest --tb=short
+```
+
+## 开源许可证
 
 [MIT](LICENSE) © 2026 Cicbyte
 
-## 🙏 致谢
+## 致谢
 
 - [Cobra](https://github.com/spf13/cobra) — CLI 框架
 - [Bubbletea](https://github.com/charmbracelet/bubbletea) — TUI 框架

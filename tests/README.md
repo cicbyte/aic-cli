@@ -60,6 +60,7 @@ tests/
     ├── __init__.py
     ├── conftest.py          # API fixture
     ├── test_basic.py        # 基础命令测试
+    ├── test_create.py       # Create 命令测试
     ├── test_edit.py         # Edit 命令测试
     ├── test_errors.py       # 错误处理测试
     ├── test_lifecycle.py    # 生命周期测试
@@ -67,6 +68,19 @@ tests/
     ├── test_remote.py       # Remote 全流程测试
     └── test_skills.py       # 技能相关测试
 ```
+
+## 测试覆盖
+
+| 测试文件 | 测试类 | 用例数 | 覆盖范围 |
+|:---|:---|:---|:---|
+| test_basic.py | TestBasicCommands | 2 | version, server status |
+| test_create.py | TestCreateBasic | 3 | create 帮助、参数验证 |
+| test_edit.py | TestEditBasic | 4 | edit 帮助、参数验证 |
+| test_errors.py | TestErrorHandling | 35 | 错误处理、边界条件 |
+| test_lifecycle.py | TestSkillLifecycle | 20 | 完整生命周期 |
+| test_patch.py | TestPatch* | 26 | 所有 patch 模式 |
+| test_remote.py | TestRemoteFullLifecycle | 21 | remote 全流程 |
+| test_skills.py | TestSkills* | 11 | 搜索、文件树、校验 |
 
 ## 测试数据
 
@@ -80,4 +94,4 @@ tests/
 1. 测试需要 aic 服务器运行中
 2. 测试会自动从 aic-cli 配置文件读取 API 地址和 Token
 3. 测试不会修改服务器数据（只读操作）
-4. 交互式测试（edit 命令）已跳过，需要模拟用户输入
+4. 交互式测试已移除，无法自动化测试
