@@ -64,6 +64,7 @@ tests/
     ├── test_errors.py       # 错误处理测试
     ├── test_lifecycle.py    # 生命周期测试
     ├── test_patch.py        # Patch 命令测试
+    ├── test_remote.py       # Remote 全流程测试
     └── test_skills.py       # 技能相关测试
 ```
 
