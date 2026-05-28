@@ -82,14 +82,25 @@ class AicCliClient:
         """显示远程技能文件树"""
         return self.run("skill", "tree", str(skill_id))
 
-    def skill_patch(self, skill_id: int, path: str, old: str = None, new: str = None,
-                    line: str = None, replace_all: bool = False, stdin: str = None) -> CliResult:
+    def skill_patch(self, skill_id: int, path: str = None, old: str = None, new: str = None,
+                    line: str = None, replace_all: bool = False, stdin: str = None,
+                    batch: str = None) -> CliResult:
         """增量编辑技能文件"""
         args = ["skill", "patch", str(skill_id)]
 
-        if stdin:
+        # stdin 模式（包括空字符串，用于测试错误处理）
+        if stdin is not None:
             args.append("--stdin")
             return self.run(*args, input_data=stdin)
+
+        # batch 模式
+        if batch:
+            args.extend(["--batch", batch])
+            return self.run(*args)
+
+        # 普通模式需要 path
+        if not path:
+            raise ValueError("path 参数是必需的（除非使用 stdin 或 batch 模式）")
 
         args.extend(["--path", path])
         if old:

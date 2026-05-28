@@ -2,14 +2,72 @@
 # 使用 __test_ 前缀标识测试数据，避免与真实数据冲突
 
 skills:
+  # 用于搜索测试的关键词
   search_keyword: "test"
+
+  # 新技能创建数据
+  create:
+    name: "__test_skill_lifecycle"
+    description: "测试技能 - 生命周期测试"
+    tags:
+      - "test"
+      - "automation"
+
+  # 更新数据
+  update:
+    name: "__test_skill_updated"
+    description: "测试技能 - 已更新"
+    tags:
+      - "test"
+      - "updated"
+
+  # 发布数据
+  publish:
+    version: "1.0.0"
+    changelog: "测试发布"
+
+  # 文件操作测试数据
+  files:
+    skill_md:
+      path: "SKILL.md"
+      content: |
+        ---
+        name: __test_skill_lifecycle
+        description: 测试技能
+        trigger: ["test"]
+        ---
+
+        # 测试技能
+
+        这是一个测试技能。
+
+    patch_old: "这是一个测试技能"
+    patch_new: "这是一个更新后的测试技能"
+
+    # 行号测试数据
+    patch_line: 8
+    patch_line_old: "# 测试技能"
+    patch_line_new: "# 更新后的测试技能"
+
+    # 新文件
+    new_file:
+      path: "prompts/test.md"
+      content: |
+        # 测试提示词
+
+        这是一个测试提示词文件。
+
   # 用于测试的技能 ID（需要在测试前确认存在）
-  # 如果服务器上没有测试技能，需要先创建或使用已知存在的技能
   existing_skill_id: 1
 
-files:
-  # 测试文件路径
-  skill_md: "SKILL.md"
-  # 测试用的旧内容和新内容
-  test_old_content: "description: "
-  test_new_content: "description: 测试更新描述"
+categories:
+  # 测试分类
+  create:
+    name: "__test_category"
+    description: "测试分类"
+
+# 错误测试数据
+errors:
+  invalid_skill_id: 999999
+  invalid_path: "nonexistent/file.txt"
+  invalid_category_id: 999999

@@ -30,3 +30,11 @@ msg.txt
 
 .scratch/
 dev-docs/
+
+# Test
+tests/test_workspace/
+tests/.venv/
+tests/__pycache__/
+.pytest_cache/
+
+.trae/

@@ -47,11 +47,26 @@ class ResourceTracker:
                 if entity_type == "skill":
                     # CLI 没有直接删除技能的命令，跳过
                     pass
+                elif entity_type == "file":
+                    # 文件操作不需要清理
+                    pass
             except Exception:
                 pass  # 忽略清理失败
+
+    def get_tracked(self, entity_type: str) -> list[int]:
+        """获取指定类型的资源 ID 列表"""
+        return [eid for etype, eid in self._created if etype == entity_type]
 
 
 @pytest.fixture(scope="session")
 def tracker() -> ResourceTracker:
     """资源追踪器 fixture"""
     return ResourceTracker()
+
+
+@pytest.fixture(scope="session")
+def test_workspace(project_root) -> Path:
+    """测试工作目录 fixture"""
+    workspace = project_root / "tests" / "test_workspace"
+    workspace.mkdir(exist_ok=True)
+    return workspace
