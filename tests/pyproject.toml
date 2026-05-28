@@ -1,0 +1,17 @@
+[project]
+name = "aic-cli-tests"
+version = "0.1.0"
+description = "AIC CLI 集成测试"
+requires-python = ">=3.10"
+dependencies = [
+    "pytest>=8.0",
+    "pytest-order>=1.2",
+    "pyyaml>=6.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["api"]
+addopts = "-v --tb=short"
+markers = [
+    "run(order=N): 控制测试执行顺序",
+]
