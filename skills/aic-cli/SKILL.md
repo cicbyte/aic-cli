@@ -22,6 +22,21 @@ aic-cli version         # 显示版本信息
 
 ## Skills 管理（常用命令）
 
+### 创建新技能
+
+```bash
+# 交互式创建（推荐）
+aic-cli skill create
+
+# 指定名称创建
+aic-cli skill create my-skill
+
+# 指定分类和标签
+aic-cli skill create my-skill --category 1 --tags "go,cli" --desc "我的技能"
+```
+
+创建后会生成模板 SKILL.md 并上传到服务器，然后可以通过 `skill remote` 命令继续编辑。
+
 ### 搜索 skill
 
 ```bash

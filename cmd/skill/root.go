@@ -37,6 +37,7 @@ func GetSkillCommand() *cobra.Command {
 	cmd.AddCommand(GetDownloadCommand())
 	cmd.AddCommand(GetImportCommand())
 	cmd.AddCommand(GetCategoriesCommand())
+	cmd.AddCommand(createCmd)
 
 	// 本地管理
 	cmd.AddCommand(local.GetListCommand())
