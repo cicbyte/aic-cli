@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/cicbyte/aic-cli/internal/agent"
 	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/common"
 	logicskill "github.com/cicbyte/aic-cli/internal/logic/skill"
@@ -120,20 +121,36 @@ func promptSelectPackage(packages []api.SkillPackage) (*api.SkillPackage, error)
 	return selected, nil
 }
 
-func getOutputDir() (string, error) {
-	return utils.ResolveOutputDir(pkgAddOutputDir, pkgAddAgentName)
+func getOutputDirAndAgent() (string, agent.AgentProfile, error) {
+	if pkgAddOutputDir != "" {
+		dir, err := utils.GetSkillsOutputDir(pkgAddOutputDir)
+		return dir, nil, err
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", nil, err
+	}
+	a, err := utils.SelectAgent(cwd, pkgAddAgentName)
+	if err != nil {
+		return "", nil, err
+	}
+	return a.SkillsDir(cwd), a, nil
 }
 
-func skillAlreadyInstalled(name, outputDir string, mode string) bool {
-	if mode == "symlink" {
-		symlinkPath := filepath.Join(outputDir, name)
-		if utils.FileExists(symlinkPath) || utils.DirExists(symlinkPath) {
-			return true
-		}
-		globalDir := utils.GetGlobalSkillsDir()
-		return utils.DirExists(filepath.Join(globalDir, name))
+func skillAlreadyInstalled(name string, a agent.AgentProfile, outputDir string) (bool, string) {
+	// 检查项目级目录
+	localPath := filepath.Join(outputDir, name)
+	if utils.FileExists(localPath) || utils.DirExists(localPath) {
+		return true, localPath
 	}
-	return utils.DirExists(filepath.Join(outputDir, name))
+	// 检查 Agent 全局 skill 目录（如 ~/.claude/skills/）
+	if a != nil && a.HasProjectSkills() {
+		globalPath := filepath.Join(a.GlobalSkillsDir(), name)
+		if utils.FileExists(globalPath) || utils.DirExists(globalPath) {
+			return true, globalPath
+		}
+	}
+	return false, ""
 }
 
 func runAdd(cmd *cobra.Command, args []string) {
@@ -146,7 +163,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	outputDir, err := getOutputDir()
+	outputDir, a, err := getOutputDirAndAgent()
 	if err != nil {
 		fmt.Printf("错误: %v\n", err)
 		os.Exit(1)
@@ -178,7 +195,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 	var actions []skillAction
 	skipped := 0
 	for _, skill := range pkg.Skills {
-		if skillAlreadyInstalled(skill.Name, outputDir, pkgAddMode) {
+		if exists, _ := skillAlreadyInstalled(skill.Name, a, outputDir); exists {
 			actions = append(actions, skillAction{skill, true})
 			skipped++
 		} else {

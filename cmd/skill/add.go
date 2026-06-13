@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/cicbyte/aic-cli/internal/agent"
 	"github.com/cicbyte/aic-cli/internal/api"
 	"github.com/cicbyte/aic-cli/internal/common"
 	logicskill "github.com/cicbyte/aic-cli/internal/logic/skill"
@@ -114,16 +115,20 @@ func promptSelectSkill(skills []api.Skill) (*api.Skill, error) {
 	return selected, nil
 }
 
-func skillAlreadyInstalled(name, outputDir, mode string) bool {
-	if mode == "symlink" {
-		symlinkPath := filepath.Join(outputDir, name)
-		if utils.FileExists(symlinkPath) || utils.DirExists(symlinkPath) {
-			return true
-		}
-		globalDir := utils.GetGlobalSkillsDir()
-		return utils.DirExists(filepath.Join(globalDir, name))
+func skillAlreadyInstalled(name string, a agent.AgentProfile, outputDir string) (bool, string) {
+	// 检查项目级目录
+	localPath := filepath.Join(outputDir, name)
+	if utils.FileExists(localPath) || utils.DirExists(localPath) {
+		return true, localPath
 	}
-	return utils.DirExists(filepath.Join(outputDir, name))
+	// 检查 Agent 全局 skill 目录（如 ~/.claude/skills/）
+	if a != nil && a.HasProjectSkills() {
+		globalPath := filepath.Join(a.GlobalSkillsDir(), name)
+		if utils.FileExists(globalPath) || utils.DirExists(globalPath) {
+			return true, globalPath
+		}
+	}
+	return false, ""
 }
 
 func runAdd(cmd *cobra.Command, args []string) {
@@ -136,7 +141,24 @@ func runAdd(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	outputDir, err := utils.ResolveOutputDir(addOutputDir, addAgentName)
+	var (
+		outputDir string
+		a         agent.AgentProfile
+		err       error
+	)
+	if addOutputDir != "" {
+		outputDir, err = utils.GetSkillsOutputDir(addOutputDir)
+	} else {
+		cwd, cwdErr := os.Getwd()
+		if cwdErr != nil {
+			fmt.Printf("错误: %v\n", cwdErr)
+			os.Exit(1)
+		}
+		a, err = utils.SelectAgent(cwd, addAgentName)
+		if err == nil {
+			outputDir = a.SkillsDir(cwd)
+		}
+	}
 	if err != nil {
 		fmt.Printf("错误: %v\n", err)
 		os.Exit(1)
@@ -154,8 +176,9 @@ func runAdd(cmd *cobra.Command, args []string) {
 	skipStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 
 	// 检查是否已安装
-	if skillAlreadyInstalled(skill.Name, outputDir, addMode) {
+	if exists, existingPath := skillAlreadyInstalled(skill.Name, a, outputDir); exists {
 		fmt.Printf("  %s %s（已存在，跳过）\n", skipStyle.Render("-"), skill.Name)
+		fmt.Printf("    路径: %s\n", existingPath)
 		return
 	}
 
@@ -176,6 +199,6 @@ func runAdd(cmd *cobra.Command, args []string) {
 	fmt.Printf("  %s %s -> %s\n", successStyle.Render("✓"), result.SkillName, result.InstallPath)
 
 	if addMode == "symlink" {
-		fmt.Printf("%s -> 全局目录\n", result.InstallPath)
+		fmt.Printf("  （软链接，实际文件存储在全局缓存目录）\n")
 	}
 }
