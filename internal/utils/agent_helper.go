@@ -33,7 +33,7 @@ func SelectAgent(projectDir string, agentName string) (agent.AgentProfile, error
 	if agentName != "" {
 		a, err := agent.GetAgent(agentName)
 		if err != nil {
-			return nil, fmt.Errorf("未知的 Agent: %s，支持: claude, cursor, continue, amazonq, copilot, windsurf, cline, opencode, codex, gemini, roo, amp, trae, openclaw, qclaw, hermes, codebuddy, qoder", agentName)
+			return nil, fmt.Errorf("未知的 Agent: %s，支持: claude, cursor, continue, amazonq, copilot, windsurf, cline, opencode, codex, gemini, roo, amp, trae, openclaw, qclaw, hermes, codebuddy, qoder, mimo, zcode", agentName)
 		}
 		return a, nil
 	}

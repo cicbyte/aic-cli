@@ -26,6 +26,8 @@ var RegisteredAgents = []AgentProfile{
 	&HermesAgent{},
 	&CodeBuddyAgent{},
 	&QoderAgent{},
+	&MimoAgent{},
+	&ZCodeAgent{},
 }
 
 // DetectAgents 检测当前项目中已安装的 Agent（项目级优先，全局型在后）
